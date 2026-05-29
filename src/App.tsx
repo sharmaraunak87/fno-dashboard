@@ -3,6 +3,8 @@ import {
   Bell,
   Calendar,
   CandlestickChart,
+  ChevronsLeft,
+  ChevronsRight,
   Gauge,
   Layers3,
   Search,
@@ -42,6 +44,7 @@ export function App() {
   const [isLive, setIsLive] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [marketHours, setMarketHours] = useState<MarketStatus | null>(null);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   // Sync market status to ref to prevent WebSocket hook re-triggers
   const marketHoursRef = useRef(marketHours);
@@ -164,46 +167,68 @@ export function App() {
   const isMarketClosed = marketHours ? !marketHours.isOpen : false;
 
   return (
-    <main className="app-shell">
-      <aside className="sidebar">
+    <main className={`app-shell ${isSidebarCollapsed ? "sidebar-collapsed" : ""}`}>
+      <aside className={`sidebar ${isSidebarCollapsed ? "collapsed" : ""}`}>
         <div className="brand">
-          <CandlestickChart aria-hidden="true" />
-          <div>
-            <strong>FNO Desk</strong>
-            <span>Options analytics</span>
+          <div className="brand-logo-section">
+            <CandlestickChart aria-hidden="true" />
+            {!isSidebarCollapsed && (
+              <div>
+                <strong>FNO Desk</strong>
+                <span>Options analytics</span>
+              </div>
+            )}
           </div>
+          <button 
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
+            className="sidebar-toggle-btn"
+            aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            type="button"
+          >
+            {isSidebarCollapsed ? <ChevronsRight aria-hidden="true" /> : <ChevronsLeft aria-hidden="true" />}
+          </button>
         </div>
 
         <nav className="nav-list" aria-label="Dashboard modules">
           <button
             className={activeTab === "overview" ? "active" : ""}
             onClick={() => setActiveTab("overview")}
+            title="Live Overview"
           >
-            <Activity aria-hidden="true" /> Live Overview
+            <Activity aria-hidden="true" />
+            {!isSidebarCollapsed && <span>Live Overview</span>}
           </button>
           <button
             className={activeTab === "oi" ? "active" : ""}
             onClick={() => setActiveTab("oi")}
+            title="Strike OI Analysis"
           >
-            <Layers3 aria-hidden="true" /> Strike OI Analysis
+            <Layers3 aria-hidden="true" />
+            {!isSidebarCollapsed && <span>Strike OI Analysis</span>}
           </button>
           <button
             className={activeTab === "greeks" ? "active" : ""}
             onClick={() => setActiveTab("greeks")}
+            title="Gamma & IV Smile"
           >
-            <Gauge aria-hidden="true" /> Gamma & IV Smile
+            <Gauge aria-hidden="true" />
+            {!isSidebarCollapsed && <span>Gamma & IV Smile</span>}
           </button>
           <button
             className={activeTab === "screeners" ? "active" : ""}
             onClick={() => setActiveTab("screeners")}
+            title="Screeners & Watch"
           >
-            <Search aria-hidden="true" /> Screeners & Watch
+            <Search aria-hidden="true" />
+            {!isSidebarCollapsed && <span>Screeners & Watch</span>}
           </button>
           <button
             className={activeTab === "holidays" ? "active" : ""}
             onClick={() => setActiveTab("holidays")}
+            title="Market Holidays"
           >
-            <Calendar aria-hidden="true" /> Market Holidays
+            <Calendar aria-hidden="true" />
+            {!isSidebarCollapsed && <span>Market Holidays</span>}
           </button>
         </nav>
       </aside>

@@ -48,8 +48,13 @@ button {
 /* App Shell Layout */
 .app-shell {
   display: grid;
-  grid-template-columns: 260px minmax(0, 1fr);
+  grid-template-columns: var(--sidebar-width, 260px) minmax(0, 1fr);
   min-height: 100vh;
+  transition: grid-template-columns 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.app-shell.sidebar-collapsed {
+  --sidebar-width: 76px;
 }
 
 /* Sidebar Styling */
@@ -60,12 +65,98 @@ button {
   display: flex;
   flex-direction: column;
   gap: 32px;
+  transition: padding 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sidebar.collapsed {
+  padding: 24px 10px;
+  align-items: center;
+}
+
+.sidebar.collapsed .brand {
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+}
+
+.sidebar.collapsed .brand-logo-section {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.sidebar.collapsed .brand svg {
+  width: 38px;
+  height: 38px;
+  padding: 6px;
+}
+
+.sidebar.collapsed .sidebar-toggle-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar.collapsed .nav-list {
+  align-items: center;
+  width: 100%;
+  gap: 12px;
+}
+
+.sidebar.collapsed .nav-list button {
+  justify-content: center;
+  padding: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  gap: 0;
+}
+
+.sidebar.collapsed .nav-list button.active {
+  border-left: none;
+  background: var(--accent-indigo);
+  color: #ffffff;
 }
 
 .brand {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.brand-logo-section {
+  display: flex;
+  align-items: center;
   gap: 12px;
+}
+
+.sidebar-toggle-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.sidebar-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+.sidebar-toggle-btn svg {
+  width: 16px;
+  height: 16px;
 }
 
 .brand svg {
@@ -471,24 +562,25 @@ button {
 
 .options-chain-table th {
   background: var(--bg-secondary);
-  padding: 12px 14px;
-  font-size: 11px;
+  padding: 20px 24px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.75px;
   border-bottom: 1px solid var(--border-color);
 }
 
 .options-chain-table td {
-  padding: 10px 14px;
-  font-size: 13px;
+  padding: 18px 24px;
+  font-size: 16px;
   border-bottom: 1px solid var(--border-color);
   font-variant-numeric: tabular-nums;
+  font-weight: 600;
 }
 
 .options-chain-table tr:hover {
-  background-color: rgba(255, 255, 255, 0.02);
+  background-color: rgba(255, 255, 255, 0.035);
 }
 
 /* Col group borders */
@@ -501,7 +593,7 @@ button {
 }
 
 .col-strike {
-  width: 100px;
+  width: 140px;
   background-color: rgba(0, 0, 0, 0.15);
 }
 
@@ -521,16 +613,17 @@ button {
 
 .strike-badge {
   display: inline-block;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 8px 16px;
+  border-radius: 8px;
   color: var(--text-primary);
-  font-weight: 700;
+  font-weight: 800;
+  font-size: 16px;
 }
 
 .atm-badge {
   background-color: var(--accent-indigo);
   color: #ffffff;
-  box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.65);
 }
 
 /* Heatmap & Grid components */
@@ -843,6 +936,7 @@ button {
   gap: 20px;
   align-items: flex-start;
   width: 100%;
+  grid-column: 1 / -1;
 }
 
 /* Left Sidebar Filter panel */
