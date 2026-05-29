@@ -1,0 +1,20 @@
+export type OptionRow = {
+  strike: number;
+  callOi: number;
+  putOi: number;
+  callIv: number;
+  putIv: number;
+  gamma: number;
+  delta: number;
+  volume: number;
+};
+
+export type MarketTick = {
+  symbol: string;
+  spot: number;
+  change: number;
+  pcr: number;
+  maxPain: number;
+  timestamp: string;
+  options: OptionRow[];
+};
