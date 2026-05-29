@@ -81,6 +81,31 @@ export function MultiStrikeOiTab({
   // Strike selector input dropdown open state
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
+  // Real historical index candles
+  const [historicalCandles, setHistoricalCandles] = useState<any[]>([]);
+
+  // Fetch real index candles when symbol or date changes
+  useEffect(() => {
+    let active = true;
+    setHistoricalCandles([]);
+
+    fetch(`/api/historical-candles/${symbol}?date=${historicalDate}`)
+      .then((res) => {
+        if (!res.ok) throw new Error();
+        return res.json();
+      })
+      .then((data: { data: any[] }) => {
+        if (active) {
+          setHistoricalCandles(data.data || []);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      active = false;
+    };
+  }, [symbol, historicalDate]);
+
   // Generate historical intraday dataset (9:15 AM to 3:30 PM IST)
   // seeded with the current live values to create a high-fidelity visual curve
   const chartData = useMemo(() => {
@@ -95,6 +120,10 @@ export function MultiStrikeOiTab({
     const baseSpot = liveTick.spot;
     const strikeRowsMap = new Map<number, OptionRow>();
     liveTick.options.forEach((r) => strikeRowsMap.set(r.strike, r));
+
+    // Map time to spot price from actual candles if available
+    const actualCandlesMap = new Map<string, number>();
+    historicalCandles.forEach((c) => actualCandlesMap.set(c.time, c.close));
 
     // Seed pseudorandom seed based on symbol and expiry
     let seed = symbol.charCodeAt(0) + (selectedExpiry?.charCodeAt(5) ?? 0);
@@ -113,11 +142,16 @@ export function MultiStrikeOiTab({
       // Progress factor: 0 at 9:15 AM, 1 at 3:30 PM
       const progress = i / (totalPoints - 1);
       
-      // Simulate spot price curve that scales with index value and returns to baseSpot at 3:30 PM (avoiding sudden jumps)
+      // Use actual spot price if found in fetched intraday candles, otherwise fallback to simulation
+      const actualSpotPrice = actualCandlesMap.get(timeStr);
+      
       const amp = baseSpot * 0.005; // 0.5% fluctuation amplitude
       const trend = Math.sin(progress * Math.PI * 2) * amp; // Sine wave ends at 0
       const noise = (rand() - 0.5) * (amp * 0.15) * (1 - progress); // Noise fades to 0 at the end
-      const spotAtTime = Number((baseSpot + trend + noise).toFixed(2));
+      
+      const spotAtTime = actualSpotPrice !== undefined 
+        ? actualSpotPrice 
+        : Number((baseSpot + trend + noise).toFixed(2));
 
       const dataPoint: any = {
         time: timeStr,
@@ -151,7 +185,9 @@ export function MultiStrikeOiTab({
 
     // Overwrite the final point with the actual live values exactly
     const lastPoint = dataPoints[dataPoints.length - 1];
-    lastPoint.Spot = liveTick.spot;
+    const finalActualSpot = actualCandlesMap.get(lastPoint.time);
+    lastPoint.Spot = finalActualSpot !== undefined ? finalActualSpot : liveTick.spot;
+    
     selectedStrikes.forEach((strike) => {
       const option = strikeRowsMap.get(strike);
       if (option) {
@@ -165,7 +201,7 @@ export function MultiStrikeOiTab({
     });
 
     return dataPoints;
-  }, [selectedStrikes, liveTick, chartMode, optType, symbol, selectedExpiry]);
+  }, [selectedStrikes, liveTick, chartMode, optType, symbol, selectedExpiry, historicalCandles]);
 
   // Remove a strike pill
   const handleRemoveStrike = (strike: number) => {
