@@ -7,6 +7,10 @@ export type OptionRow = {
   gamma: number;
   delta: number;
   volume: number;
+  callSecurityId?: number;
+  putSecurityId?: number;
+  callVolume?: number;
+  putVolume?: number;
 };
 
 export type MarketTick = {

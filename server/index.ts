@@ -11,6 +11,10 @@ const app = express();
 const port = Number(process.env.PORT ?? 8787);
 const provider = getMarketDataProvider();
 
+// In-memory cache for Dhan chart requests to avoid 429 rate limit errors
+const chartCache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_TTL_MS = 30000; // 30 seconds TTL
+
 app.use(cors());
 app.use(express.json());
 
@@ -56,6 +60,13 @@ app.get("/api/historical-candles/:symbol", async (request, response) => {
   try {
     const symbol = resolveSymbol(request.params.symbol);
     const dateStr = typeof request.query.date === "string" ? request.query.date : new Date().toISOString().split("T")[0];
+
+    const cacheKey = `INDEX-${symbol.dhanSecurityId}-${dateStr}`;
+    const cached = chartCache.get(cacheKey);
+    if (cached && (Date.now() - cached.timestamp < CACHE_TTL_MS)) {
+      response.json({ data: cached.data });
+      return;
+    }
     
     // Query range covers the selected date up to the next day
     const fromDate = dateStr;
@@ -80,7 +91,7 @@ app.get("/api/historical-candles/:symbol", async (request, response) => {
       securityId: String(symbol.dhanSecurityId),
       exchangeSegment: symbol.dhanSegment,
       instrument: "INDEX",
-      interval: "5",
+      interval: "1",
       fromDate,
       toDate
     };
@@ -133,6 +144,7 @@ app.get("/api/historical-candles/:symbol", async (request, response) => {
         }
       });
 
+      chartCache.set(cacheKey, { data: candles, timestamp: Date.now() });
       response.json({ data: candles });
     } else {
       response.json({ data: [] });
@@ -140,6 +152,107 @@ app.get("/api/historical-candles/:symbol", async (request, response) => {
   } catch (error) {
     console.error("[Server] Failed to fetch historical candles:", error);
     response.json({ data: [] }); // return empty on error to let frontend fallback gracefully
+  }
+});
+
+app.get("/api/historical-option-candles/:securityId", async (request, response) => {
+  try {
+    const securityId = request.params.securityId;
+    const dateStr = typeof request.query.date === "string" ? request.query.date : new Date().toISOString().split("T")[0];
+
+    const cacheKey = `OPTION-${securityId}-${dateStr}`;
+    const cached = chartCache.get(cacheKey);
+    if (cached && (Date.now() - cached.timestamp < CACHE_TTL_MS)) {
+      response.json({ data: cached.data });
+      return;
+    }
+    
+    // Query range covers the selected date up to the next day
+    const fromDate = dateStr;
+    const dateObj = new Date(dateStr);
+    dateObj.setDate(dateObj.getDate() + 1);
+    
+    const y = dateObj.getFullYear();
+    const m = String(dateObj.getMonth() + 1).padStart(2, "0");
+    const d = String(dateObj.getDate()).padStart(2, "0");
+    const toDate = `${y}-${m}-${d}`;
+
+    const dhanBaseUrl = process.env.DHAN_API_BASE_URL ?? "https://api.dhan.co/v2";
+    const dhanClientId = process.env.DHAN_CLIENT_ID?.trim();
+    const dhanAccessToken = process.env.DHAN_ACCESS_TOKEN?.trim();
+
+    if (!dhanClientId || !dhanAccessToken || process.env.MARKET_DATA_PROVIDER !== "dhan") {
+      response.json({ data: [] });
+      return;
+    }
+
+    const payload = {
+      securityId: String(securityId),
+      exchangeSegment: "NSE_FNO",
+      instrument: "OPTIDX",
+      interval: "1",
+      fromDate,
+      toDate,
+      oi: true
+    };
+
+    const res = await fetch(`${dhanBaseUrl}/charts/intraday`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "access-token": dhanAccessToken,
+        "client-id": dhanClientId
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      throw new Error(`Dhan option chart API returned status ${res.status}`);
+    }
+
+    const result = await res.json() as any;
+    if (result.status === "success" || (result.open && result.open.length > 0) || (result.data && result.data.open && result.data.open.length > 0)) {
+      const { open, high, low, close, volume, timestamp, open_interest } = result.data || result;
+      if (!timestamp) {
+        response.json({ data: [] });
+        return;
+      }
+
+      // Filter specifically for the target date to ensure exact time bounds
+      const targetDateFormatted = new Date(dateStr).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata" });
+      const candles: any[] = [];
+      
+      timestamp.forEach((ts: number, idx: number) => {
+        const dObj = new Date(ts * 1000);
+        const candleDateStr = dObj.toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata" });
+        const timeStr = dObj.toLocaleTimeString("en-IN", {
+          timeZone: "Asia/Kolkata",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false
+        });
+
+        if (candleDateStr === targetDateFormatted) {
+          candles.push({
+            time: timeStr,
+            open: open[idx],
+            high: high[idx],
+            low: low[idx],
+            close: close[idx],
+            volume: volume ? volume[idx] : 0,
+            open_interest: open_interest ? open_interest[idx] : 0
+          });
+        }
+      });
+
+      chartCache.set(cacheKey, { data: candles, timestamp: Date.now() });
+      response.json({ data: candles });
+    } else {
+      response.json({ data: [] });
+    }
+  } catch (error) {
+    console.error("[Server] Failed to fetch historical option candles:", error);
+    response.json({ data: [] });
   }
 });
 
@@ -233,3 +346,4 @@ server.listen(port, () => {
 function normalizeError(error: unknown) {
   return error instanceof Error ? error.message : "Unknown market data error";
 }
+// Trigger server restart to reload new cache values with security IDs & volume mapping.

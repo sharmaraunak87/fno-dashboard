@@ -107,7 +107,11 @@ function mapOptionChain(symbol: string, payload: DhanOptionChainResponse): Tick 
       putIv: Number((row.pe?.implied_volatility ?? 0).toFixed(2)),
       gamma: Number(Math.max(row.ce?.greeks?.gamma ?? 0, row.pe?.greeks?.gamma ?? 0).toFixed(5)),
       delta: Number((row.ce?.greeks?.delta ?? row.pe?.greeks?.delta ?? 0).toFixed(2)),
-      volume: (row.ce?.volume ?? 0) + (row.pe?.volume ?? 0)
+      volume: (row.ce?.volume ?? 0) + (row.pe?.volume ?? 0),
+      callSecurityId: row.ce?.security_id,
+      putSecurityId: row.pe?.security_id,
+      callVolume: row.ce?.volume ?? 0,
+      putVolume: row.pe?.volume ?? 0
     }))
     .filter((row) => Number.isFinite(row.strike))
     .sort((a, b) => a.strike - b.strike);
