@@ -146,6 +146,11 @@ export function MultiStrikeOiTab({
     }
   }, [dateMode, todayDateStr, precedingTradingDayStr]);
 
+  // Reset selection mode to "high_oi" when expiry changes
+  useEffect(() => {
+    setSelectionMode("high_oi");
+  }, [selectedExpiry]);
+
   // Compute top 6 highest-OI option contracts restricted to +/- 10 strikes around CMP
   const topOiContracts = useMemo(() => {
     if (!liveTick.options.length) return [];
