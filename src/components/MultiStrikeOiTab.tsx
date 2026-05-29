@@ -627,12 +627,14 @@ export function MultiStrikeOiTab({
     setIsPlaying(!isPlaying);
   };
 
-  // Helper formatting values
+  // Helper formatting values in Lakhs
   const formatCompact = (val: number) => {
-    return Intl.NumberFormat("en-IN", {
-      notation: "compact",
+    if (val === null || val === undefined || isNaN(val)) return "0.00 Lakh";
+    const lakhs = val / 100000;
+    return `${lakhs.toLocaleString("en-IN", {
+      minimumFractionDigits: 2,
       maximumFractionDigits: 2
-    }).format(val);
+    })} Lakh`;
   };
 
   return (
@@ -892,7 +894,7 @@ export function MultiStrikeOiTab({
                     contentStyle={{ backgroundColor: "#12151e", borderColor: "#1e293b", color: "#e2e8f0" }}
                     formatter={(value: any, name: any) => {
                       if (name === "Spot") return [Number(value).toLocaleString("en-IN"), "Index Spot"];
-                      return [Number(value).toLocaleString("en-IN"), name];
+                      return [formatCompact(Number(value)), name];
                     }}
                   />
                   <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: "11px" }} />
