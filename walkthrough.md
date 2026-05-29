@@ -57,13 +57,26 @@ We have successfully refactored and expanded your FNO Dashboard project inside t
   - **Simplified Chart Series**: Replaced the complex individual/ratio chart selectors with a clean, dynamic plotting logic that maps the exact mixed list of selected CE and PE contracts on the same graph.
 
 ---
+### 8. Intraday Replay Scrubber & Slicer
+- **File modified**: [MultiStrikeOiTab.tsx](file:///C:/Users/ACER/Documents/Codex/2026-05-29/justticks-in-is-a-comprehensive-stock-2/src/components/MultiStrikeOiTab.tsx)
+  - **Play/Pause animation**: Added a playback loop that advances the timeline minute-by-minute, replaying options activity and OI build-up.
+  - **Dual Scrubber**: Slider lets users scrub through any time of day (9:15 AM to 3:30 PM).
+  - **Preset buttons**: Slices the chart timeline to standard intervals (`Last 3 min`, `Last 5 min`, `Last 10 min`, `Last 15 min`, `Last 30 min`, `Last 1 hr`, `Last 2 hr`, `Last 3 hr`, `All`).
+  - **Date Alert Banner**: Displays a prominent warning note above the chart: `You are viewing options intraday activity for: [Date]`, which updates dynamically.
+
+### 9. Weekend and Holiday Live Tab Routing
+- **Live tab blank on holidays**: If today is a trading holiday, the Live tab remains blank and displays a clean placeholder banner.
+- **Weekend automatic fallback**: If it is Saturday or Sunday, the Live tab automatically displays the closing data session of the preceding trading day (Friday).
+- **Historical default date**: When switching to Historical mode, the date picker automatically pre-selects the preceding valid trading day (e.g. yesterday, or Friday if today is weekend).
+
+---
 
 ## Validation & Verification Results
 
 ### 1. Build and Compilation
 - **Typecheck (`tsc`)**: Verified by running `node node_modules/typescript/bin/tsc --noEmit`. Completed successfully with **0 errors**.
-- **Dev Server Compilation**: The dev server is active in the background (Task `task-441`) and compiled the new frontend changes cleanly via Vite HMR with no errors.
+- **Dev Server Compilation**: Verified compilation of the playback animation and conditional routing hooks.
 
-### 2. Live Verification of LHS Layout
-- Segmented controls, cards, colored pills, and the selection table are now visually styled and correctly integrated into the LHS pane using pre-built theme styles in `src/styles.css`.
-- Contract-specific add/remove operations correctly update the state and update the line charts in real-time.
+### 2. Live Verification
+- Verified play/pause increments, timeline slicing presets, date banner updates, and holiday blank state placeholders.
+
