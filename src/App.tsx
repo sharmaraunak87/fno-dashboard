@@ -13,10 +13,10 @@ import { ExpirySelector } from "./components/ExpirySelector";
 import { MetricStrip } from "./components/MetricStrip";
 import { OptionsChainTable } from "./components/OptionsChainTable";
 import { HolidaysTable } from "./components/HolidaysTable";
+import { MultiStrikeOiTab } from "./components/MultiStrikeOiTab";
 import {
   PricePcrChart,
   CallPutOiChart,
-  StrikeOiChart,
   IvSkewChart,
   GammaHeatmap
 } from "./components/AnalyticsCharts";
@@ -244,7 +244,7 @@ export function App() {
           </div>
         )}
 
-        {activeTab !== "holidays" && (
+        {activeTab !== "holidays" && activeTab !== "oi" && (
           <>
             {/* Expiry Selector Bar */}
             <section className="expiry-bar">
@@ -290,10 +290,15 @@ export function App() {
               )}
 
               {activeTab === "oi" && (
-                <article className="panel wide-panel">
-                  <PanelTitle title="Multi-Strike OI Comparison" subtitle="Visualizing support (green) and resistance (red) across strikes" />
-                  <StrikeOiChart options={tick.options} spot={tick.spot} />
-                </article>
+                <MultiStrikeOiTab
+                  symbol={symbol}
+                  setSymbol={setSymbol}
+                  selectedExpiry={selectedExpiry}
+                  setExpiry={setSelectedExpiry}
+                  liveTick={tick}
+                  isLive={isLive}
+                  marketHours={marketHours}
+                />
               )}
 
               {activeTab === "greeks" && (
