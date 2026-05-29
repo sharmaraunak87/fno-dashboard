@@ -113,10 +113,11 @@ export function MultiStrikeOiTab({
       // Progress factor: 0 at 9:15 AM, 1 at 3:30 PM
       const progress = i / (totalPoints - 1);
       
-      // Simulate spot price (future price) curve
-      const trend = Math.sin(progress * Math.PI * 1.5) * 60;
-      const noise = (rand() - 0.5) * 20;
-      const spotAtTime = Number((baseSpot - 40 + trend + noise).toFixed(2));
+      // Simulate spot price curve that scales with index value and returns to baseSpot at 3:30 PM (avoiding sudden jumps)
+      const amp = baseSpot * 0.005; // 0.5% fluctuation amplitude
+      const trend = Math.sin(progress * Math.PI * 2) * amp; // Sine wave ends at 0
+      const noise = (rand() - 0.5) * (amp * 0.15) * (1 - progress); // Noise fades to 0 at the end
+      const spotAtTime = Number((baseSpot + trend + noise).toFixed(2));
 
       const dataPoint: any = {
         time: timeStr,
@@ -130,9 +131,10 @@ export function MultiStrikeOiTab({
           strike: strike
         };
 
-        // Simulating OI buildup over the session
-        // Typically OI starts lower at 9:15 AM and builds up
-        const buildFactor = 0.3 + progress * 0.7 + (rand() - 0.4) * 0.15;
+        // Simulating OI buildup over the session smoothly
+        const progressFactor = 0.3 + progress * 0.7; // scales from 30% to 100%
+        const noise = (rand() - 0.45) * 0.1 * (1 - progress); // noise fades to 0 at 3:30 PM
+        const buildFactor = progressFactor + noise;
         const callOiAtTime = Math.round(option.callOi * Math.max(0.1, buildFactor));
         const putOiAtTime = Math.round(option.putOi * Math.max(0.1, buildFactor));
 
@@ -349,8 +351,11 @@ export function MultiStrikeOiTab({
       {/* 2. Right Main Layout Chart panel */}
       <section className="multistrike-chart-panel">
         <header className="chart-header">
-          <div className="chart-hdr-title-bar">
-            <h2>MultiStrike OI</h2>
+          <div className="chart-hdr-title-bar" style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+            <h2 style={{ margin: 0 }}>MultiStrike OI</h2>
+            <span style={{ fontSize: "11px", background: "rgba(99, 102, 241, 0.12)", border: "1px solid rgba(99, 102, 241, 0.25)", color: "var(--accent-indigo)", padding: "4px 10px", borderRadius: "6px", fontWeight: "700" }}>
+              Date: {new Date(historicalDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+            </span>
             {isAutoMode && <span className="auto-badge">Auto-Tracking Highest OI Strikes</span>}
           </div>
           
@@ -394,9 +399,15 @@ export function MultiStrikeOiTab({
         {/* Intraday line chart */}
         <div className="line-chart-wrapper">
           <ResponsiveContainer width="100%" height={450}>
-            <LineChart data={chartData} margin={{ top: 20, right: 30, left: 10, bottom: 10 }}>
+            <LineChart data={chartData} margin={{ top: 20, right: 30, left: 10, bottom: 25 }}>
               <CartesianGrid stroke="#1e222b" vertical={true} horizontal={true} strokeDasharray="3 3" />
-              <XAxis dataKey="time" stroke="#5d6575" fontSize={11} tickLine={false} />
+              <XAxis 
+                dataKey="time" 
+                stroke="#5d6575" 
+                fontSize={11} 
+                tickLine={false} 
+                label={{ value: `Intraday Time — Loading analysis from: ${new Date(historicalDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}`, position: "insideBottom", offset: -16, fill: "var(--text-secondary)", fontSize: 11, fontWeight: 600 }}
+              />
               
               {/* Primary Y-axis: Open Interest */}
               <YAxis
