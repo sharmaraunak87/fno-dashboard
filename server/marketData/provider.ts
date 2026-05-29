@@ -111,7 +111,13 @@ function getFallbackExpiries(): string[] {
     while (date.getDay() !== 4) { // 4 is Thursday
       date.setDate(date.getDate() + 1);
     }
-    expiries.push(date.toISOString().split("T")[0]);
+    
+    // Format locally to avoid UTC conversion shifts
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    expiries.push(`${y}-${m}-${d}`);
+    
     date.setDate(date.getDate() + 1); // Move past this Thursday
   }
   return expiries;

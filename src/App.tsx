@@ -8,7 +8,7 @@ import {
   Search,
   TrendingUp
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ExpirySelector } from "./components/ExpirySelector";
 import { MetricStrip } from "./components/MetricStrip";
 import { OptionsChainTable } from "./components/OptionsChainTable";
@@ -43,6 +43,12 @@ export function App() {
   const [activeTab, setActiveTab] = useState("overview");
   const [marketHours, setMarketHours] = useState<MarketStatus | null>(null);
 
+  // Sync market status to ref to prevent WebSocket hook re-triggers
+  const marketHoursRef = useRef(marketHours);
+  useEffect(() => {
+    marketHoursRef.current = marketHours;
+  }, [marketHours]);
+
   // Reset expiry when symbol changes to let ExpirySelector auto-select the first one
   useEffect(() => {
     setSelectedExpiry(undefined);
@@ -75,7 +81,7 @@ export function App() {
       setIsLive(false);
       fallbackInterval = window.setInterval(() => {
         // If market is closed, we freeze and display cached ticks instead of ticking mocks!
-        if (marketHours && !marketHours.isOpen) {
+        if (marketHoursRef.current && !marketHoursRef.current.isOpen) {
           return;
         }
 
@@ -138,7 +144,7 @@ export function App() {
       window.clearInterval(fallbackInterval);
       socket.close();
     };
-  }, [symbol, selectedExpiry, marketHours]);
+  }, [symbol, selectedExpiry]);
 
   // Aggregate totals
   const totals = useMemo(() => {
