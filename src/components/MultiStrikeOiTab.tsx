@@ -120,7 +120,7 @@ export function MultiStrikeOiTab({
 
       const dataPoint: any = {
         time: timeStr,
-        Future: spotAtTime
+        Spot: spotAtTime
       };
 
       selectedStrikes.forEach((strike) => {
@@ -149,7 +149,7 @@ export function MultiStrikeOiTab({
 
     // Overwrite the final point with the actual live values exactly
     const lastPoint = dataPoints[dataPoints.length - 1];
-    lastPoint.Future = liveTick.spot;
+    lastPoint.Spot = liveTick.spot;
     selectedStrikes.forEach((strike) => {
       const option = strikeRowsMap.get(strike);
       if (option) {
@@ -410,37 +410,37 @@ export function MultiStrikeOiTab({
                 domain={[(dataMin: number) => Math.max(0, dataMin - 50000), (dataMax: number) => dataMax + 50000]}
               />
               
-              {/* Secondary Y-axis: Spot/Future Price */}
+              {/* Secondary Y-axis: Spot Price */}
               <YAxis
-                yAxisId="future"
+                yAxisId="spot"
                 stroke="#64748b"
                 fontSize={11}
                 tickLine={false}
                 width={65}
                 orientation="left"
-                domain={["dataMin - 20", "dataMax + 20"]}
+                domain={[(dataMin: number) => Math.floor(dataMin - 20), (dataMax: number) => Math.ceil(dataMax + 20)]}
                 tickFormatter={(val) => Number(val).toLocaleString("en-IN")}
               />
 
               <Tooltip
                 contentStyle={{ backgroundColor: "#12151e", borderColor: "#1e293b", color: "#e2e8f0" }}
                 formatter={(value: any, name: any) => {
-                  if (name === "Future") return [Number(value).toLocaleString("en-IN"), "Future Spot"];
+                  if (name === "Spot") return [Number(value).toLocaleString("en-IN"), "Index Spot"];
                   return [Number(value).toLocaleString("en-IN"), name];
                 }}
               />
               <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: "11px" }} />
 
-              {/* Dotted line for future spot price */}
+              {/* Dotted line for underlying index spot price */}
               <Line
-                yAxisId="future"
+                yAxisId="spot"
                 type="monotone"
-                dataKey="Future"
+                dataKey="Spot"
                 stroke="#64748b"
                 strokeDasharray="4 4"
                 strokeWidth={1.5}
                 dot={false}
-                name="Future"
+                name="Spot"
               />
 
               {/* Colored lines for individual strike Open Interests */}

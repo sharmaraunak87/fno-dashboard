@@ -419,6 +419,846 @@
           "volume": 28349620
         }
       ]
+    },
+    "2026-06-09": {
+      "symbol": "NIFTY",
+      "spot": 23547.75,
+      "change": 0,
+      "pcr": 1.12,
+      "maxPain": 18150,
+      "timestamp": "2026-05-29T20:50:21.008Z",
+      "options": [
+        {
+          "strike": 22550,
+          "callOi": 0,
+          "putOi": 48360,
+          "callIv": 31.37,
+          "putIv": 16.2,
+          "gamma": 0.00021,
+          "delta": 0.81,
+          "volume": 239070
+        },
+        {
+          "strike": 22600,
+          "callOi": 0,
+          "putOi": 455780,
+          "callIv": 47.13,
+          "putIv": 16.3,
+          "gamma": 0.00018,
+          "delta": 0.72,
+          "volume": 1593735
+        },
+        {
+          "strike": 22650,
+          "callOi": 0,
+          "putOi": 70590,
+          "callIv": 44.21,
+          "putIv": 16.1,
+          "gamma": 0.00019,
+          "delta": 0.72,
+          "volume": 486460
+        },
+        {
+          "strike": 22700,
+          "callOi": 520,
+          "putOi": 806130,
+          "callIv": 36.71,
+          "putIv": 15.87,
+          "gamma": 0.00022,
+          "delta": 0.75,
+          "volume": 2585375
+        },
+        {
+          "strike": 22750,
+          "callOi": 0,
+          "putOi": 113165,
+          "callIv": 44.01,
+          "putIv": 15.64,
+          "gamma": 0.00023,
+          "delta": 0.7,
+          "volume": 541970
+        },
+        {
+          "strike": 22800,
+          "callOi": 1755,
+          "putOi": 1353885,
+          "callIv": 27.13,
+          "putIv": 15.67,
+          "gamma": 0.00027,
+          "delta": 0.78,
+          "volume": 3729440
+        },
+        {
+          "strike": 22850,
+          "callOi": 0,
+          "putOi": 75270,
+          "callIv": 41.86,
+          "putIv": 15.21,
+          "gamma": 0.00029,
+          "delta": 0.69,
+          "volume": 434655
+        },
+        {
+          "strike": 22900,
+          "callOi": 1820,
+          "putOi": 658905,
+          "callIv": 29.56,
+          "putIv": 15.14,
+          "gamma": 0.00032,
+          "delta": 0.74,
+          "volume": 2433730
+        },
+        {
+          "strike": 22950,
+          "callOi": 325,
+          "putOi": 94705,
+          "callIv": 26.61,
+          "putIv": 14.94,
+          "gamma": 0.00035,
+          "delta": 0.74,
+          "volume": 445640
+        },
+        {
+          "strike": 23000,
+          "callOi": 33475,
+          "putOi": 1621750,
+          "callIv": 25.78,
+          "putIv": 14.89,
+          "gamma": 0.00038,
+          "delta": 0.73,
+          "volume": 5488860
+        },
+        {
+          "strike": 23050,
+          "callOi": 1950,
+          "putOi": 98410,
+          "callIv": 26.86,
+          "putIv": 14.65,
+          "gamma": 0.00042,
+          "delta": 0.71,
+          "volume": 467480
+        },
+        {
+          "strike": 23100,
+          "callOi": 3965,
+          "putOi": 516620,
+          "callIv": 24.86,
+          "putIv": 14.31,
+          "gamma": 0.00045,
+          "delta": 0.71,
+          "volume": 2433340
+        },
+        {
+          "strike": 23150,
+          "callOi": 4095,
+          "putOi": 130845,
+          "callIv": 21.81,
+          "putIv": 14.16,
+          "gamma": 0.00049,
+          "delta": 0.71,
+          "volume": 592865
+        },
+        {
+          "strike": 23200,
+          "callOi": 42900,
+          "putOi": 867425,
+          "callIv": 22.94,
+          "putIv": 13.94,
+          "gamma": 0.00053,
+          "delta": 0.68,
+          "volume": 3057275
+        },
+        {
+          "strike": 23250,
+          "callOi": 5655,
+          "putOi": 141765,
+          "callIv": 22.93,
+          "putIv": 14.02,
+          "gamma": 0.00056,
+          "delta": 0.66,
+          "volume": 607750
+        },
+        {
+          "strike": 23300,
+          "callOi": 26000,
+          "putOi": 1365845,
+          "callIv": 22.38,
+          "putIv": 13.42,
+          "gamma": 0.00061,
+          "delta": 0.64,
+          "volume": 3626480
+        },
+        {
+          "strike": 23350,
+          "callOi": 17225,
+          "putOi": 140530,
+          "callIv": 21.5,
+          "putIv": 13.23,
+          "gamma": 0.00065,
+          "delta": 0.63,
+          "volume": 940550
+        },
+        {
+          "strike": 23400,
+          "callOi": 60645,
+          "putOi": 1093560,
+          "callIv": 21.75,
+          "putIv": 13.14,
+          "gamma": 0.00069,
+          "delta": 0.6,
+          "volume": 3444545
+        },
+        {
+          "strike": 23450,
+          "callOi": 20280,
+          "putOi": 98280,
+          "callIv": 21.05,
+          "putIv": 13.11,
+          "gamma": 0.00071,
+          "delta": 0.59,
+          "volume": 769405
+        },
+        {
+          "strike": 23500,
+          "callOi": 751920,
+          "putOi": 1330940,
+          "callIv": 20.35,
+          "putIv": 12.72,
+          "gamma": 0.00075,
+          "delta": 0.56,
+          "volume": 7872735
+        },
+        {
+          "strike": 23550,
+          "callOi": 71045,
+          "putOi": 88595,
+          "callIv": 20.15,
+          "putIv": 12.5,
+          "gamma": 0.00078,
+          "delta": 0.54,
+          "volume": 1068665
+        },
+        {
+          "strike": 23600,
+          "callOi": 315445,
+          "putOi": 749515,
+          "callIv": 19.88,
+          "putIv": 12.04,
+          "gamma": 0.00082,
+          "delta": 0.52,
+          "volume": 3475355
+        },
+        {
+          "strike": 23650,
+          "callOi": 38545,
+          "putOi": 145860,
+          "callIv": 19.7,
+          "putIv": 11.83,
+          "gamma": 0.00083,
+          "delta": 0.49,
+          "volume": 1111565
+        },
+        {
+          "strike": 23700,
+          "callOi": 1685710,
+          "putOi": 1838460,
+          "callIv": 19.25,
+          "putIv": 11.4,
+          "gamma": 0.00085,
+          "delta": 0.46,
+          "volume": 8963240
+        },
+        {
+          "strike": 23750,
+          "callOi": 153595,
+          "putOi": 135460,
+          "callIv": 19.16,
+          "putIv": 11.27,
+          "gamma": 0.00084,
+          "delta": 0.44,
+          "volume": 1799590
+        },
+        {
+          "strike": 23800,
+          "callOi": 1147380,
+          "putOi": 823680,
+          "callIv": 18.82,
+          "putIv": 10.82,
+          "gamma": 0.00084,
+          "delta": 0.41,
+          "volume": 8708635
+        },
+        {
+          "strike": 23850,
+          "callOi": 210535,
+          "putOi": 130130,
+          "callIv": 18.52,
+          "putIv": 9.94,
+          "gamma": 0.00084,
+          "delta": 0.39,
+          "volume": 2340065
+        },
+        {
+          "strike": 23900,
+          "callOi": 1151865,
+          "putOi": 787215,
+          "callIv": 18.18,
+          "putIv": 9.27,
+          "gamma": 0.00081,
+          "delta": 0.36,
+          "volume": 11098815
+        },
+        {
+          "strike": 23950,
+          "callOi": 293995,
+          "putOi": 136240,
+          "callIv": 18.12,
+          "putIv": 8.81,
+          "gamma": 0.00074,
+          "delta": 0.33,
+          "volume": 2784015
+        },
+        {
+          "strike": 24000,
+          "callOi": 2132650,
+          "putOi": 1153945,
+          "callIv": 17.97,
+          "putIv": 7.75,
+          "gamma": 0.00062,
+          "delta": 0.31,
+          "volume": 14221675
+        },
+        {
+          "strike": 24050,
+          "callOi": 165945,
+          "putOi": 83785,
+          "callIv": 17.71,
+          "putIv": 0,
+          "gamma": 0.00047,
+          "delta": 0.28,
+          "volume": 1132300
+        },
+        {
+          "strike": 24100,
+          "callOi": 630500,
+          "putOi": 130715,
+          "callIv": 17.57,
+          "putIv": 0,
+          "gamma": 0.00045,
+          "delta": 0.26,
+          "volume": 3745235
+        },
+        {
+          "strike": 24150,
+          "callOi": 146315,
+          "putOi": 20735,
+          "callIv": 17.49,
+          "putIv": 0,
+          "gamma": 0.00043,
+          "delta": 0.23,
+          "volume": 918905
+        },
+        {
+          "strike": 24200,
+          "callOi": 1081665,
+          "putOi": 101660,
+          "callIv": 17.35,
+          "putIv": 0,
+          "gamma": 0.00041,
+          "delta": 0.21,
+          "volume": 4195035
+        },
+        {
+          "strike": 24250,
+          "callOi": 171600,
+          "putOi": 11375,
+          "callIv": 17.26,
+          "putIv": 0,
+          "gamma": 0.00039,
+          "delta": 0.19,
+          "volume": 1195675
+        },
+        {
+          "strike": 24300,
+          "callOi": 632515,
+          "putOi": 52845,
+          "callIv": 17.21,
+          "putIv": 0,
+          "gamma": 0.00037,
+          "delta": 0.17,
+          "volume": 3668015
+        },
+        {
+          "strike": 24350,
+          "callOi": 181285,
+          "putOi": 7930,
+          "callIv": 17.39,
+          "putIv": 0,
+          "gamma": 0.00034,
+          "delta": 0.16,
+          "volume": 1204060
+        },
+        {
+          "strike": 24400,
+          "callOi": 935610,
+          "putOi": 29835,
+          "callIv": 17.21,
+          "putIv": 0,
+          "gamma": 0.00032,
+          "delta": 0.14,
+          "volume": 3297775
+        },
+        {
+          "strike": 24450,
+          "callOi": 139945,
+          "putOi": 3185,
+          "callIv": 17.23,
+          "putIv": 0,
+          "gamma": 0.00029,
+          "delta": 0.12,
+          "volume": 988455
+        },
+        {
+          "strike": 24500,
+          "callOi": 1626560,
+          "putOi": 107315,
+          "callIv": 17.34,
+          "putIv": 0,
+          "gamma": 0.00027,
+          "delta": 0.11,
+          "volume": 7168395
+        },
+        {
+          "strike": 24550,
+          "callOi": 197145,
+          "putOi": 1040,
+          "callIv": 17.08,
+          "putIv": 0,
+          "gamma": 0.00025,
+          "delta": 0.1,
+          "volume": 1078350
+        }
+      ]
+    },
+    "2026-06-16": {
+      "symbol": "NIFTY",
+      "spot": 23547.75,
+      "change": 0,
+      "pcr": 0.87,
+      "maxPain": 18150,
+      "timestamp": "2026-05-29T20:55:54.714Z",
+      "options": [
+        {
+          "strike": 22550,
+          "callOi": 0,
+          "putOi": 5590,
+          "callIv": 11.94,
+          "putIv": 16.73,
+          "gamma": 0.00019,
+          "delta": 0.97,
+          "volume": 11180
+        },
+        {
+          "strike": 22600,
+          "callOi": 0,
+          "putOi": 40820,
+          "callIv": 13.75,
+          "putIv": 16.23,
+          "gamma": 0.0002,
+          "delta": 0.94,
+          "volume": 24830
+        },
+        {
+          "strike": 22650,
+          "callOi": 0,
+          "putOi": 5850,
+          "callIv": 14.99,
+          "putIv": 16.3,
+          "gamma": 0.00022,
+          "delta": 0.91,
+          "volume": 12805
+        },
+        {
+          "strike": 22700,
+          "callOi": 0,
+          "putOi": 65715,
+          "callIv": 15.8,
+          "putIv": 15.88,
+          "gamma": 0.00023,
+          "delta": 0.89,
+          "volume": 175370
+        },
+        {
+          "strike": 22750,
+          "callOi": 0,
+          "putOi": 5655,
+          "callIv": 16.38,
+          "putIv": 15.86,
+          "gamma": 0.00025,
+          "delta": 0.87,
+          "volume": 14170
+        },
+        {
+          "strike": 22800,
+          "callOi": 0,
+          "putOi": 69615,
+          "callIv": 16.95,
+          "putIv": 15.69,
+          "gamma": 0.00027,
+          "delta": 0.84,
+          "volume": 154310
+        },
+        {
+          "strike": 22850,
+          "callOi": 0,
+          "putOi": 8775,
+          "callIv": 17.43,
+          "putIv": 15.49,
+          "gamma": 0.00029,
+          "delta": 0.82,
+          "volume": 16380
+        },
+        {
+          "strike": 22900,
+          "callOi": 0,
+          "putOi": 57850,
+          "callIv": 17.86,
+          "putIv": 15.31,
+          "gamma": 0.00031,
+          "delta": 0.8,
+          "volume": 130325
+        },
+        {
+          "strike": 22950,
+          "callOi": 0,
+          "putOi": 13390,
+          "callIv": 18.23,
+          "putIv": 15.34,
+          "gamma": 0.00033,
+          "delta": 0.78,
+          "volume": 38740
+        },
+        {
+          "strike": 23000,
+          "callOi": 3510,
+          "putOi": 243360,
+          "callIv": 21.38,
+          "putIv": 15.11,
+          "gamma": 0.00035,
+          "delta": 0.73,
+          "volume": 664820
+        },
+        {
+          "strike": 23050,
+          "callOi": 0,
+          "putOi": 9490,
+          "callIv": 25.4,
+          "putIv": 14.94,
+          "gamma": 0.00037,
+          "delta": 0.69,
+          "volume": 22035
+        },
+        {
+          "strike": 23100,
+          "callOi": 520,
+          "putOi": 49205,
+          "callIv": 20.2,
+          "putIv": 14.8,
+          "gamma": 0.00039,
+          "delta": 0.71,
+          "volume": 148525
+        },
+        {
+          "strike": 23150,
+          "callOi": 0,
+          "putOi": 14170,
+          "callIv": 18.5,
+          "putIv": 14.69,
+          "gamma": 0.00041,
+          "delta": 0.71,
+          "volume": 27560
+        },
+        {
+          "strike": 23200,
+          "callOi": 1300,
+          "putOi": 89440,
+          "callIv": 21.42,
+          "putIv": 14.39,
+          "gamma": 0.00044,
+          "delta": 0.67,
+          "volume": 150475
+        },
+        {
+          "strike": 23250,
+          "callOi": 65,
+          "putOi": 19760,
+          "callIv": 22.43,
+          "putIv": 14.5,
+          "gamma": 0.00045,
+          "delta": 0.65,
+          "volume": 28990
+        },
+        {
+          "strike": 23300,
+          "callOi": 1690,
+          "putOi": 116610,
+          "callIv": 29.46,
+          "putIv": 14.27,
+          "gamma": 0.00047,
+          "delta": 0.61,
+          "volume": 161850
+        },
+        {
+          "strike": 23350,
+          "callOi": 1235,
+          "putOi": 17225,
+          "callIv": 18.33,
+          "putIv": 14.15,
+          "gamma": 0.00049,
+          "delta": 0.64,
+          "volume": 31525
+        },
+        {
+          "strike": 23400,
+          "callOi": 7670,
+          "putOi": 53105,
+          "callIv": 18.98,
+          "putIv": 13.96,
+          "gamma": 0.00051,
+          "delta": 0.61,
+          "volume": 90025
+        },
+        {
+          "strike": 23450,
+          "callOi": 3250,
+          "putOi": 10075,
+          "callIv": 18.53,
+          "putIv": 13.74,
+          "gamma": 0.00053,
+          "delta": 0.6,
+          "volume": 57265
+        },
+        {
+          "strike": 23500,
+          "callOi": 147680,
+          "putOi": 359515,
+          "callIv": 18.35,
+          "putIv": 13.64,
+          "gamma": 0.00055,
+          "delta": 0.58,
+          "volume": 657475
+        },
+        {
+          "strike": 23550,
+          "callOi": 5980,
+          "putOi": 9750,
+          "callIv": 18.19,
+          "putIv": 13.44,
+          "gamma": 0.00056,
+          "delta": 0.56,
+          "volume": 44135
+        },
+        {
+          "strike": 23600,
+          "callOi": 27365,
+          "putOi": 71370,
+          "callIv": 17.95,
+          "putIv": 13.38,
+          "gamma": 0.00057,
+          "delta": 0.53,
+          "volume": 194740
+        },
+        {
+          "strike": 23650,
+          "callOi": 10010,
+          "putOi": 13975,
+          "callIv": 17.69,
+          "putIv": 13.28,
+          "gamma": 0.00058,
+          "delta": 0.51,
+          "volume": 63180
+        },
+        {
+          "strike": 23700,
+          "callOi": 51025,
+          "putOi": 53040,
+          "callIv": 17.38,
+          "putIv": 12.97,
+          "gamma": 0.00059,
+          "delta": 0.49,
+          "volume": 355225
+        },
+        {
+          "strike": 23750,
+          "callOi": 17875,
+          "putOi": 18655,
+          "callIv": 17.22,
+          "putIv": 12.57,
+          "gamma": 0.00061,
+          "delta": 0.47,
+          "volume": 90805
+        },
+        {
+          "strike": 23800,
+          "callOi": 113100,
+          "putOi": 85995,
+          "callIv": 17.23,
+          "putIv": 12.55,
+          "gamma": 0.0006,
+          "delta": 0.45,
+          "volume": 488540
+        },
+        {
+          "strike": 23850,
+          "callOi": 19110,
+          "putOi": 14625,
+          "callIv": 17.01,
+          "putIv": 12.12,
+          "gamma": 0.00061,
+          "delta": 0.42,
+          "volume": 97630
+        },
+        {
+          "strike": 23900,
+          "callOi": 137540,
+          "putOi": 107185,
+          "callIv": 16.89,
+          "putIv": 11.98,
+          "gamma": 0.0006,
+          "delta": 0.4,
+          "volume": 548925
+        },
+        {
+          "strike": 23950,
+          "callOi": 34970,
+          "putOi": 9685,
+          "callIv": 16.78,
+          "putIv": 11.65,
+          "gamma": 0.00059,
+          "delta": 0.38,
+          "volume": 130455
+        },
+        {
+          "strike": 24000,
+          "callOi": 342290,
+          "putOi": 189345,
+          "callIv": 16.68,
+          "putIv": 11.78,
+          "gamma": 0.00057,
+          "delta": 0.36,
+          "volume": 1110525
+        },
+        {
+          "strike": 24050,
+          "callOi": 10985,
+          "putOi": 3380,
+          "callIv": 16.45,
+          "putIv": 4.88,
+          "gamma": 0.00051,
+          "delta": 0.33,
+          "volume": 31785
+        },
+        {
+          "strike": 24100,
+          "callOi": 96655,
+          "putOi": 43485,
+          "callIv": 16.21,
+          "putIv": 11.17,
+          "gamma": 0.00053,
+          "delta": 0.31,
+          "volume": 173680
+        },
+        {
+          "strike": 24150,
+          "callOi": 10660,
+          "putOi": 2275,
+          "callIv": 16.22,
+          "putIv": 10.16,
+          "gamma": 0.00051,
+          "delta": 0.29,
+          "volume": 23270
+        },
+        {
+          "strike": 24200,
+          "callOi": 77415,
+          "putOi": 13845,
+          "callIv": 16.13,
+          "putIv": 9.59,
+          "gamma": 0.00046,
+          "delta": 0.27,
+          "volume": 206765
+        },
+        {
+          "strike": 24250,
+          "callOi": 8580,
+          "putOi": 130,
+          "callIv": 16.11,
+          "putIv": 0,
+          "gamma": 0.00038,
+          "delta": 0.25,
+          "volume": 30810
+        },
+        {
+          "strike": 24300,
+          "callOi": 70265,
+          "putOi": 10075,
+          "callIv": 15.98,
+          "putIv": 0,
+          "gamma": 0.00037,
+          "delta": 0.23,
+          "volume": 290810
+        },
+        {
+          "strike": 24350,
+          "callOi": 11115,
+          "putOi": 780,
+          "callIv": 15.82,
+          "putIv": 0,
+          "gamma": 0.00035,
+          "delta": 0.21,
+          "volume": 47450
+        },
+        {
+          "strike": 24400,
+          "callOi": 76765,
+          "putOi": 1300,
+          "callIv": 15.81,
+          "putIv": 0,
+          "gamma": 0.00033,
+          "delta": 0.19,
+          "volume": 132405
+        },
+        {
+          "strike": 24450,
+          "callOi": 17940,
+          "putOi": 65,
+          "callIv": 15.75,
+          "putIv": 17.31,
+          "gamma": 0.00032,
+          "delta": 0.18,
+          "volume": 36920
+        },
+        {
+          "strike": 24500,
+          "callOi": 415870,
+          "putOi": 5980,
+          "callIv": 15.79,
+          "putIv": 0,
+          "gamma": 0.0003,
+          "delta": 0.16,
+          "volume": 853840
+        },
+        {
+          "strike": 24550,
+          "callOi": 18915,
+          "putOi": 0,
+          "callIv": 15.73,
+          "putIv": 31.07,
+          "gamma": 0.00028,
+          "delta": 0.15,
+          "volume": 48880
+        }
+      ]
     }
   },
   "BANKNIFTY": {

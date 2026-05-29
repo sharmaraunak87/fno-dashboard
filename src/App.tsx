@@ -57,6 +57,27 @@ export function App() {
     setSelectedExpiry(undefined);
   }, [symbol]);
 
+  // Fetch initial/offline option chain snapshot when symbol or expiry changes
+  useEffect(() => {
+    let active = true;
+    const url = `/api/snapshot/${symbol}${selectedExpiry ? `?expiry=${selectedExpiry}` : ""}`;
+    fetch(url)
+      .then((res) => {
+        if (!res.ok) throw new Error();
+        return res.json();
+      })
+      .then((data: MarketTick) => {
+        if (active) {
+          setTick(data);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      active = false;
+    };
+  }, [symbol, selectedExpiry]);
+
   // Query market hours status periodically to handle automatic transitions
   useEffect(() => {
     const fetchStatus = () => {
