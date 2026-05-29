@@ -1,0 +1,65 @@
+{
+  "NIFTY": {
+    "2026-06-02": {
+      "symbol": "NIFTY",
+      "spot": 22514.42,
+      "change": -0.42,
+      "pcr": 1.08,
+      "maxPain": 22500,
+      "timestamp": "2026-05-29T15:30:00.000Z",
+      "options": [
+        { "strike": 22300, "callOi": 845000, "putOi": 150000, "callIv": 11.2, "putIv": 12.4, "gamma": 0.0012, "delta": 0.85, "volume": 45000 },
+        { "strike": 22350, "callOi": 620000, "putOi": 240000, "callIv": 11.0, "putIv": 12.1, "gamma": 0.0016, "delta": 0.80, "volume": 58000 },
+        { "strike": 22400, "callOi": 950000, "putOi": 480000, "callIv": 10.7, "putIv": 11.8, "gamma": 0.0022, "delta": 0.72, "volume": 85000 },
+        { "strike": 22450, "callOi": 1150000, "putOi": 820000, "callIv": 10.4, "putIv": 11.5, "gamma": 0.0032, "delta": 0.62, "volume": 120000 },
+        { "strike": 22500, "callOi": 2200000, "putOi": 2100000, "callIv": 10.2, "putIv": 11.2, "gamma": 0.0042, "delta": 0.51, "volume": 280000 },
+        { "strike": 22550, "callOi": 1850000, "putOi": 1250000, "callIv": 10.1, "putIv": 11.0, "gamma": 0.0038, "delta": 0.41, "volume": 210000 },
+        { "strike": 22600, "callOi": 2450000, "putOi": 920000, "callIv": 9.9, "putIv": 10.8, "gamma": 0.0028, "delta": 0.31, "volume": 175000 },
+        { "strike": 22650, "callOi": 1100000, "putOi": 410000, "callIv": 9.8, "putIv": 10.7, "gamma": 0.0018, "delta": 0.22, "volume": 92000 },
+        { "strike": 22700, "callOi": 1950000, "putOi": 280000, "callIv": 9.7, "putIv": 10.6, "gamma": 0.0011, "delta": 0.14, "volume": 64000 }
+      ]
+    }
+  },
+  "BANKNIFTY": {
+    "2026-06-30": {
+      "symbol": "BANKNIFTY",
+      "spot": 48554.56,
+      "change": 0.18,
+      "pcr": 1.05,
+      "maxPain": 48500,
+      "timestamp": "2026-05-29T15:30:00.000Z",
+      "options": [
+        { "strike": 48100, "callOi": 350000, "putOi": 920000, "callIv": 14.5, "putIv": 15.6, "gamma": 0.0005, "delta": 0.88, "volume": 25000 },
+        { "strike": 48200, "callOi": 420000, "putOi": 840000, "callIv": 14.2, "putIv": 15.3, "gamma": 0.0008, "delta": 0.81, "volume": 32000 },
+        { "strike": 48300, "callOi": 510000, "putOi": 780000, "callIv": 13.9, "putIv": 15.0, "gamma": 0.0012, "delta": 0.72, "volume": 41000 },
+        { "strike": 48400, "callOi": 680000, "putOi": 950000, "callIv": 13.6, "putIv": 14.7, "gamma": 0.0018, "delta": 0.62, "volume": 68000 },
+        { "strike": 48500, "callOi": 1450000, "putOi": 1520000, "callIv": 13.3, "putIv": 14.4, "gamma": 0.0025, "delta": 0.52, "volume": 180000 },
+        { "strike": 48600, "callOi": 1250000, "putOi": 980000, "callIv": 13.1, "putIv": 14.2, "gamma": 0.0021, "delta": 0.42, "volume": 125000 },
+        { "strike": 48700, "callOi": 1150000, "putOi": 720000, "callIv": 12.9, "putIv": 14.0, "gamma": 0.0015, "delta": 0.32, "volume": 94000 },
+        { "strike": 48800, "callOi": 980000, "putOi": 480000, "callIv": 12.7, "putIv": 13.8, "gamma": 0.0009, "delta": 0.23, "volume": 72000 },
+        { "strike": 48900, "callOi": 820000, "putOi": 250000, "callIv": 12.5, "putIv": 13.6, "gamma": 0.0005, "delta": 0.15, "volume": 48000 }
+      ]
+    }
+  },
+  "FINNIFTY": {
+    "2026-06-30": {
+      "symbol": "FINNIFTY",
+      "spot": 21450.5,
+      "change": 0.35,
+      "pcr": 1.09,
+      "maxPain": 21450,
+      "timestamp": "2026-05-29T15:30:00.000Z",
+      "options": [
+        { "strike": 21250, "callOi": 180000, "putOi": 450000, "callIv": 13.2, "putIv": 14.3, "gamma": 0.0011, "delta": 0.86, "volume": 12000 },
+        { "strike": 21300, "callOi": 220000, "putOi": 520000, "callIv": 12.9, "putIv": 14.0, "gamma": 0.0015, "delta": 0.80, "volume": 18000 },
+        { "strike": 21350, "callOi": 280000, "putOi": 420000, "callIv": 12.6, "putIv": 13.7, "gamma": 0.0022, "delta": 0.70, "volume": 24000 },
+        { "strike": 21400, "callOi": 350000, "putOi": 580000, "callIv": 12.3, "putIv": 13.4, "gamma": 0.0031, "delta": 0.60, "volume": 38000 },
+        { "strike": 21450, "callOi": 850000, "putOi": 920000, "callIv": 12.0, "putIv": 13.1, "gamma": 0.0041, "delta": 0.50, "volume": 95000 },
+        { "strike": 21500, "callOi": 780000, "putOi": 620000, "callIv": 11.8, "putIv": 12.9, "gamma": 0.0035, "delta": 0.40, "volume": 72000 },
+        { "strike": 21550, "callOi": 620000, "putOi": 410000, "callIv": 11.6, "putIv": 12.7, "gamma": 0.0025, "delta": 0.30, "volume": 45000 },
+        { "strike": 21600, "callOi": 950000, "putOi": 280000, "callIv": 11.4, "putIv": 12.5, "gamma": 0.0016, "delta": 0.21, "volume": 32000 },
+        { "strike": 21650, "callOi": 420000, "putOi": 150000, "callIv": 11.2, "putIv": 12.3, "gamma": 0.0010, "delta": 0.13, "volume": 15000 }
+      ]
+    }
+  }
+}

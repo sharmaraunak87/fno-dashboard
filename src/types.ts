@@ -17,4 +17,13 @@ export type MarketTick = {
   maxPain: number;
   timestamp: string;
   options: OptionRow[];
+  marketHours?: MarketStatus;
 };
+
+export interface MarketStatus {
+  isOpen: boolean;
+  reason: "OPEN" | "WEEKEND" | "HOLIDAY" | "BEFORE_MARKET" | "AFTER_MARKET";
+  reasonText: string;
+  currentTimeIst: string;
+  nextOpenTimeIst: string;
+}
