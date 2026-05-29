@@ -28,8 +28,27 @@ export function getMarketDataProvider(): MarketDataProvider {
           } as any;
         }
         
-        // If not in cache, fallback to mock data but mark as closed
-        console.warn(`[Provider] Closed & no cache for ${symbol.symbol} @ ${selectedExpiry}. Generating mock.`);
+        // If not in cache, try to fetch once from Dhan to seed the cache!
+        if (primaryProvider.name === "dhan") {
+          try {
+            console.log(`[Provider] Closed market cache miss. Fetching from Dhan once to seed cache: ${symbol.symbol} @ ${selectedExpiry}`);
+            const tick = await primaryProvider.getSnapshot(symbol, selectedExpiry);
+            const isRealDhan = !(tick as any).isFallback;
+            if (isRealDhan) {
+              saveCachedSnapshot(symbol.symbol, selectedExpiry, tick);
+            }
+            return {
+              ...tick,
+              marketStatus: "CLOSED",
+              lastUpdated: tick.timestamp
+            } as any;
+          } catch (error) {
+            console.warn(`[Provider] Closed market Dhan fetch failed for ${symbol.symbol} @ ${selectedExpiry}:`, error instanceof Error ? error.message : error);
+          }
+        }
+
+        // If not in cache and Dhan fetch failed, fallback to mock data but mark as closed
+        console.warn(`[Provider] Closed & no cache/API for ${symbol.symbol} @ ${selectedExpiry}. Generating mock.`);
         const mockTick = await mockProvider.getSnapshot(symbol);
         return {
           ...mockTick,
@@ -81,23 +100,20 @@ export function getMarketDataProvider(): MarketDataProvider {
     async getExpiries(symbol) {
       const status = getMarketStatus();
 
-      // If market is closed, avoid hitting Dhan API for expiries and return mock/cached dates
-      if (!status.isOpen) {
-        return getFallbackExpiries();
-      }
-
-      try {
-        if (primaryProvider.getExpiries) {
+      // Try to fetch active expiries from Dhan first, even if the market is closed,
+      // so that we match the real options chain dates rather than generating mock Thursdays
+      if (primaryProvider.name === "dhan" && primaryProvider.getExpiries) {
+        try {
           const expiries = await primaryProvider.getExpiries(symbol);
           if (expiries.length > 0) {
             return expiries;
           }
+        } catch (error) {
+          console.warn(`[Provider] Expiries fetch failed from Dhan, falling back:`, error instanceof Error ? error.message : error);
         }
-        return getFallbackExpiries();
-      } catch (error) {
-        console.warn(`[Provider] Expiries fetch failed for ${symbol.symbol}, returning fallbacks:`, error instanceof Error ? error.message : error);
-        return getFallbackExpiries();
       }
+
+      return getFallbackExpiries();
     }
   };
 }
