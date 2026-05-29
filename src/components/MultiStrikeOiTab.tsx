@@ -407,7 +407,7 @@ export function MultiStrikeOiTab({
                 tickLine={false}
                 width={50}
                 orientation="right"
-                domain={["dataMin - 100000", "dataMax + 100000"]}
+                domain={[(dataMin: number) => Math.max(0, dataMin - 50000), (dataMax: number) => dataMax + 50000]}
               />
               
               {/* Secondary Y-axis: Spot/Future Price */}
