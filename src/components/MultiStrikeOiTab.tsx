@@ -21,6 +21,46 @@ interface MultiStrikeOiTabProps {
   marketHours: MarketStatus | null;
 }
 
+// 2026 Scheduled Market Holidays
+const HOLIDAYS = [
+  "2026-01-15", "2026-01-26", "2026-03-03", "2026-03-26", "2026-03-31",
+  "2026-04-03", "2026-04-14", "2026-05-01", "2026-05-28", "2026-06-26",
+  "2026-09-14", "2026-10-02", "2026-10-20", "2026-11-10", "2026-11-24",
+  "2026-12-25"
+];
+
+// Find preceding valid trading day
+function getLastTradingDayStr(date: Date): string {
+  const checkDate = new Date(date);
+  while (true) {
+    const dayOfWeek = checkDate.getDay();
+    const y = checkDate.getFullYear();
+    const m = String(checkDate.getMonth() + 1).padStart(2, "0");
+    const d = String(checkDate.getDate()).padStart(2, "0");
+    const dateStr = `${y}-${m}-${d}`;
+    
+    // Is it weekend?
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+      checkDate.setDate(checkDate.getDate() - 1);
+      continue;
+    }
+    
+    // Is it holiday?
+    if (HOLIDAYS.includes(dateStr)) {
+      checkDate.setDate(checkDate.getDate() - 1);
+      continue;
+    }
+    
+    return dateStr;
+  }
+}
+
+function getPrecedingTradingDayStr(date: Date): string {
+  const d = new Date(date);
+  d.setDate(d.getDate() - 1);
+  return getLastTradingDayStr(d);
+}
+
 // Colors for the line series
 const LINE_COLORS = ["#ef4444", "#10b981", "#6366f1", "#f59e0b", "#ec4899", "#06b6d4", "#a855f7", "#14b8a6"];
 
@@ -59,6 +99,40 @@ export function MultiStrikeOiTab({
     return formatter.format(d);
   }, []);
 
+  const isTodayHoliday = useMemo(() => {
+    return HOLIDAYS.includes(todayDateStr);
+  }, [todayDateStr]);
+
+  const isWeekend = useMemo(() => {
+    const d = new Date();
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Kolkata",
+      weekday: "long"
+    });
+    const w = formatter.format(d);
+    return w === "Saturday" || w === "Sunday";
+  }, []);
+
+  const activeQueryDate = useMemo(() => {
+    if (dateMode === "live") {
+      if (isTodayHoliday) {
+        return ""; // Holiday has no active date / blank state
+      }
+      if (isWeekend) {
+        const kolkataDate = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+        return getLastTradingDayStr(kolkataDate);
+      }
+      return todayDateStr;
+    } else {
+      return historicalDate;
+    }
+  }, [dateMode, isTodayHoliday, isWeekend, todayDateStr, historicalDate]);
+
+  const precedingTradingDayStr = useMemo(() => {
+    const kolkataDate = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+    return getPrecedingTradingDayStr(kolkataDate);
+  }, []);
+
   // Selection mode: "custom" | "high_oi" | "high_volume"
   const [selectionMode, setSelectionMode] = useState<"custom" | "high_oi" | "high_volume" >("high_oi");
   const [selectedContracts, setSelectedContracts] = useState<Array<{ strike: number; type: "CE" | "PE" }>>([]);
@@ -68,9 +142,9 @@ export function MultiStrikeOiTab({
     if (dateMode === "live") {
       setHistoricalDate(todayDateStr);
     } else {
-      setHistoricalDate("2026-05-29");
+      setHistoricalDate(precedingTradingDayStr);
     }
-  }, [dateMode, todayDateStr]);
+  }, [dateMode, todayDateStr, precedingTradingDayStr]);
 
   // Compute top 6 highest-OI option contracts restricted to +/- 10 strikes around CMP
   const topOiContracts = useMemo(() => {
@@ -148,11 +222,12 @@ export function MultiStrikeOiTab({
 
   // Fetch real index candles when symbol or date changes
   useEffect(() => {
+    if (!activeQueryDate) return;
     let active = true;
     setHistoricalCandles([]);
 
     const fetchData = () => {
-      fetch(`/api/historical-candles/${symbol}?date=${historicalDate}`)
+      fetch(`/api/historical-candles/${symbol}?date=${activeQueryDate}`)
         .then((res) => {
           if (!res.ok) throw new Error();
           return res.json();
@@ -168,7 +243,7 @@ export function MultiStrikeOiTab({
     fetchData();
 
     let intervalId: number | undefined;
-    if (historicalDate === todayDateStr) {
+    if (activeQueryDate === todayDateStr) {
       intervalId = window.setInterval(fetchData, 30000);
     }
 
@@ -176,7 +251,7 @@ export function MultiStrikeOiTab({
       active = false;
       if (intervalId) window.clearInterval(intervalId);
     };
-  }, [symbol, historicalDate, todayDateStr]);
+  }, [symbol, activeQueryDate, todayDateStr]);
 
   // Needed security IDs based on selected contracts
   const neededSecurityIds = useMemo(() => {
@@ -205,7 +280,7 @@ export function MultiStrikeOiTab({
   const neededSecurityIdsKey = neededSecurityIds.join(",");
 
   useEffect(() => {
-    if (neededSecurityIds.length === 0) {
+    if (neededSecurityIds.length === 0 || !activeQueryDate) {
       setHistoricalOptionCandles({});
       return;
     }
@@ -215,7 +290,7 @@ export function MultiStrikeOiTab({
 
     const fetchOptionData = () => {
       const promises = neededSecurityIds.map((secId) =>
-        fetch(`/api/historical-option-candles/${secId}?date=${historicalDate}`)
+        fetch(`/api/historical-option-candles/${secId}?date=${activeQueryDate}`)
           .then((res) => {
             if (!res.ok) throw new Error();
             return res.json();
@@ -238,7 +313,7 @@ export function MultiStrikeOiTab({
     fetchOptionData();
 
     let intervalId: number | undefined;
-    if (historicalDate === todayDateStr) {
+    if (activeQueryDate === todayDateStr) {
       intervalId = window.setInterval(fetchOptionData, 30000);
     }
 
@@ -246,7 +321,71 @@ export function MultiStrikeOiTab({
       active = false;
       if (intervalId) window.clearInterval(intervalId);
     };
-  }, [neededSecurityIdsKey, historicalDate, todayDateStr]);
+  }, [neededSecurityIdsKey, activeQueryDate, todayDateStr]);
+
+  // Replay & Scrubber Slider state variables
+  const [timeWindow, setTimeWindow] = useState<string>("all");
+  const [currentPlayMinutes, setCurrentPlayMinutes] = useState<number>(930);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState(250); // ms per step (1 minute)
+
+  // Get Kolkata time in minutes from midnight IST
+  const getKolkataMinutes = () => {
+    const liveD = new Date();
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Kolkata",
+      hour: "numeric",
+      minute: "numeric",
+      hour12: false
+    });
+    const parts = formatter.formatToParts(liveD);
+    const hPart = parts.find(p => p.type === "hour");
+    const mPart = parts.find(p => p.type === "minute");
+    if (hPart && mPart) {
+      return Number(hPart.value) * 60 + Number(mPart.value);
+    }
+    return 930;
+  };
+
+  const liveTimeMinutes = useMemo(() => {
+    if (dateMode === "live" && !isWeekend && !isTodayHoliday) {
+      const mins = getKolkataMinutes();
+      return Math.min(930, Math.max(555, mins));
+    }
+    return 930;
+  }, [dateMode, isWeekend, isTodayHoliday]);
+
+  // Playback loop
+  useEffect(() => {
+    if (!isPlaying) return;
+
+    const intervalId = setInterval(() => {
+      setCurrentPlayMinutes((prev) => {
+        const maxLimit = (dateMode === "live" && !isWeekend && !isTodayHoliday) ? liveTimeMinutes : 930;
+        if (prev >= maxLimit) {
+          setIsPlaying(false);
+          return maxLimit;
+        }
+        return prev + 1;
+      });
+    }, playbackSpeed);
+
+    return () => clearInterval(intervalId);
+  }, [isPlaying, playbackSpeed, dateMode, isWeekend, isTodayHoliday, liveTimeMinutes]);
+
+  // Sync current play scrubber defaults on date transitions
+  useEffect(() => {
+    if (dateMode === "live") {
+      if (isWeekend) {
+        setCurrentPlayMinutes(930);
+      } else if (!isTodayHoliday) {
+        setCurrentPlayMinutes(liveTimeMinutes);
+      }
+    } else {
+      setCurrentPlayMinutes(930);
+    }
+    setIsPlaying(false);
+  }, [activeQueryDate, dateMode, liveTimeMinutes, isWeekend, isTodayHoliday]);
 
   // Generate historical intraday dataset (9:15 AM to 3:30 PM IST)
   // seeded with the current live values to create a high-fidelity visual curve
@@ -269,7 +408,7 @@ export function MultiStrikeOiTab({
 
     // Get live timestamp time in minutes from midnight (IST)
     let liveMinutes = 15 * 60 + 30;
-    if (historicalDate === todayDateStr) {
+    if (activeQueryDate === todayDateStr) {
       const liveD = liveTick.timestamp ? new Date(liveTick.timestamp) : new Date();
       const formatter = new Intl.DateTimeFormat("en-US", {
         timeZone: "Asia/Kolkata",
@@ -302,7 +441,7 @@ export function MultiStrikeOiTab({
       // Progress factor: 0 at 9:15 AM, 1 at 3:30 PM
       const progress = i / (totalPoints - 1);
       
-      const isFuturePoint = (historicalDate === todayDateStr) && (currentMinutes > liveMinutes);
+      const isFuturePoint = (activeQueryDate === todayDateStr) && (currentMinutes > liveMinutes);
       if (isFuturePoint) {
         dataPoints.push({
           time: timeStr,
@@ -312,7 +451,7 @@ export function MultiStrikeOiTab({
       }
 
       // If it is the current live tick time and today, overwrite with ticking quotes directly
-      if (currentMinutes === liveMinutes && historicalDate === todayDateStr) {
+      if (currentMinutes === liveMinutes && activeQueryDate === todayDateStr) {
         const dataPoint: any = {
           time: timeStr,
           Spot: liveTick.spot
@@ -365,7 +504,7 @@ export function MultiStrikeOiTab({
           ? Math.round(fallbackOption.callOi * Math.max(0.1, buildFactor))
           : Math.round(fallbackOption.putOi * Math.max(0.1, buildFactor));
 
-        const finalOi = actualOi !== undefined ? actualOi : (historicalDate === todayDateStr ? simOi : null);
+        const finalOi = actualOi !== undefined ? actualOi : (activeQueryDate === todayDateStr ? simOi : null);
 
         dataPoint[`${contract.strike} ${contract.type} OI`] = finalOi;
       });
@@ -374,7 +513,7 @@ export function MultiStrikeOiTab({
     }
 
     // Overwrite the final point with the actual live values exactly if not today
-    if (historicalDate !== todayDateStr) {
+    if (activeQueryDate !== todayDateStr) {
       const lastPoint = dataPoints[dataPoints.length - 1];
       const finalActualSpot = actualCandlesMap.get(lastPoint.time);
       lastPoint.Spot = finalActualSpot !== undefined ? finalActualSpot : liveTick.spot;
@@ -393,7 +532,21 @@ export function MultiStrikeOiTab({
     }
 
     return dataPoints;
-  }, [selectedContracts, liveTick, symbol, selectedExpiry, historicalCandles, historicalOptionCandles, historicalDate, todayDateStr]);
+  }, [selectedContracts, liveTick, symbol, selectedExpiry, historicalCandles, historicalOptionCandles, activeQueryDate, todayDateStr]);
+
+  // Sliced chart data filtered by play scrubber and window selection
+  const filteredChartData = useMemo(() => {
+    const maxIdx = currentPlayMinutes - 555;
+    if (maxIdx < 0) return [];
+    
+    let sliced = chartData.slice(0, maxIdx + 1);
+    
+    if (timeWindow !== "all") {
+      const windowSize = Number(timeWindow);
+      sliced = sliced.slice(Math.max(0, sliced.length - windowSize));
+    }
+    return sliced;
+  }, [chartData, currentPlayMinutes, timeWindow]);
 
   // Add a contract (calls selection table)
   const handleAddContract = (strike: number, type: "CE" | "PE") => {
@@ -451,6 +604,22 @@ export function MultiStrikeOiTab({
     if (diffDays === 0) return "today";
     if (diffDays < 0) return "expired";
     return `${diffDays}d`;
+  };
+
+  const minutesToTimeStr = (totalMinutes: number) => {
+    const hours = Math.floor(totalMinutes / 60);
+    const mins = totalMinutes % 60;
+    const ampm = hours >= 12 ? "PM" : "AM";
+    const displayHours = hours % 12 === 0 ? 12 : hours % 12;
+    return `${String(displayHours).padStart(2, "0")}:${String(mins).padStart(2, "0")} ${ampm}`;
+  };
+
+  const handlePlayToggle = () => {
+    const maxLimit = (dateMode === "live" && !isWeekend && !isTodayHoliday) ? liveTimeMinutes : 930;
+    if (currentPlayMinutes >= maxLimit) {
+      setCurrentPlayMinutes(555);
+    }
+    setIsPlaying(!isPlaying);
   };
 
   // Helper formatting values
@@ -634,101 +803,196 @@ export function MultiStrikeOiTab({
         <header className="chart-header">
           <div className="chart-hdr-title-bar" style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
             <h2 style={{ margin: 0 }}>MultiStrike OI</h2>
-            <span style={{ fontSize: "11px", background: "rgba(99, 102, 241, 0.12)", border: "1px solid rgba(99, 102, 241, 0.25)", color: "var(--accent-indigo)", padding: "4px 10px", borderRadius: "6px", fontWeight: "700" }}>
-              Date: {new Date(historicalDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
-            </span>
+            {activeQueryDate && (
+              <span style={{ fontSize: "11px", background: "rgba(99, 102, 241, 0.12)", border: "1px solid rgba(99, 102, 241, 0.25)", color: "var(--accent-indigo)", padding: "4px 10px", borderRadius: "6px", fontWeight: "700" }}>
+                Date: {new Date(activeQueryDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+              </span>
+            )}
             {selectionMode === "high_oi" && <span className="auto-badge">Auto-Tracking Top OI Strikes</span>}
             {selectionMode === "high_volume" && <span className="auto-badge">Auto-Tracking Top Volume Strikes</span>}
             {selectionMode === "custom" && <span className="auto-badge" style={{ color: "#ef4444", borderColor: "rgba(239, 68, 68, 0.25)", background: "rgba(239, 68, 68, 0.12)" }}>Custom Strikes Selection</span>}
           </div>
         </header>
 
-        {historicalDate !== todayDateStr && !isLoadingOptionCandles && !hasOptionCandlesData && (
-          <div className="warning-banner" style={{ margin: "0 24px 16px 24px", padding: "12px 16px", backgroundColor: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.2)", borderRadius: "6px", color: "#f87171", fontSize: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            <span>No historical Open Interest (OI) data available for expiry <strong>{selectedExpiry ? new Date(selectedExpiry).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : ""}</strong> on <strong>{new Date(historicalDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</strong>. This contract was likely not active or trading on this date.</span>
+        {/* Date Display note banner */}
+        {activeQueryDate && (
+          <div className="viewing-date-alert-banner">
+            <span
+              className="banner-pulse-dot"
+              style={{
+                backgroundColor: dateMode === "live" ? "var(--accent-green)" : "var(--accent-indigo)",
+                boxShadow: dateMode === "live" ? "0 0 10px var(--accent-green)" : "0 0 10px var(--accent-indigo)"
+              }}
+            ></span>
+            <span>
+              You are viewing options intraday activity for: <strong>{new Date(activeQueryDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</strong> {dateMode === "live" && isWeekend && " (Last Trading Day)"}.
+            </span>
           </div>
         )}
 
-        {/* Intraday line chart */}
-        <div className="line-chart-wrapper">
-          <ResponsiveContainer width="100%" height={450}>
-            <LineChart data={chartData} margin={{ top: 20, right: 30, left: 10, bottom: 25 }}>
-              <CartesianGrid stroke="#1e222b" vertical={true} horizontal={true} strokeDasharray="3 3" />
-              <XAxis 
-                dataKey="time" 
-                stroke="#5d6575" 
-                fontSize={11} 
-                tickLine={false} 
-                label={{ value: `Intraday Time — Loading analysis from: ${new Date(historicalDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}`, position: "insideBottom", offset: -16, fill: "var(--text-secondary)", fontSize: 11, fontWeight: 600 }}
-              />
-              
-              {/* Primary Y-axis: Open Interest */}
-              <YAxis
-                yAxisId="oi"
-                tickFormatter={formatCompact}
-                stroke="#94a3b8"
-                fontSize={11}
-                tickLine={false}
-                width={50}
-                orientation="right"
-                domain={[(dataMin: number) => Math.max(0, dataMin - 50000), (dataMax: number) => dataMax + 50000]}
-              />
-              
-              {/* Secondary Y-axis: Spot Price */}
-              <YAxis
-                yAxisId="spot"
-                stroke="#64748b"
-                fontSize={11}
-                tickLine={false}
-                width={65}
-                orientation="left"
-                domain={[(dataMin: number) => Math.floor(dataMin - 20), (dataMax: number) => Math.ceil(dataMax + 20)]}
-                tickFormatter={(val) => Number(val).toLocaleString("en-IN")}
-              />
+        {/* Blank state if it is a holiday in Live mode */}
+        {dateMode === "live" && isTodayHoliday ? (
+          <div className="holiday-blank-state">
+            <div className="blank-state-icon">🗓️</div>
+            <h3>Market is Closed Today</h3>
+            <p>Today is a scheduled trading holiday. Live market tracking is unavailable. Please select the <strong>Historical</strong> tab on the left to analyze past trading sessions.</p>
+          </div>
+        ) : (
+          <>
+            {activeQueryDate !== "" && activeQueryDate !== todayDateStr && !isLoadingOptionCandles && !hasOptionCandlesData && (
+              <div className="warning-banner" style={{ margin: "0 24px 16px 24px", padding: "12px 16px", backgroundColor: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.2)", borderRadius: "6px", color: "#f87171", fontSize: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span>No historical Open Interest (OI) data available for expiry <strong>{selectedExpiry ? new Date(selectedExpiry).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : ""}</strong> on <strong>{new Date(activeQueryDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</strong>. This contract was likely not active or trading on this date.</span>
+              </div>
+            )}
 
-              <Tooltip
-                contentStyle={{ backgroundColor: "#12151e", borderColor: "#1e293b", color: "#e2e8f0" }}
-                formatter={(value: any, name: any) => {
-                  if (name === "Spot") return [Number(value).toLocaleString("en-IN"), "Index Spot"];
-                  return [Number(value).toLocaleString("en-IN"), name];
-                }}
-              />
-              <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: "11px" }} />
-
-              {/* Dotted line for underlying index spot price */}
-              <Line
-                yAxisId="spot"
-                type="monotone"
-                dataKey="Spot"
-                stroke="#64748b"
-                strokeDasharray="4 4"
-                strokeWidth={1.5}
-                dot={false}
-                name="Spot"
-              />
-
-              {/* Colored lines for individual selected contracts */}
-              {selectedContracts.map((contract, idx) => {
-                const color = LINE_COLORS[idx % LINE_COLORS.length];
-                const key = `${contract.strike} ${contract.type} OI`;
-                return (
-                  <Line
-                    key={key}
-                    yAxisId="oi"
-                    type="monotone"
-                    dataKey={key}
-                    stroke={color}
-                    strokeWidth={2}
-                    dot={false}
-                    activeDot={{ r: 4 }}
-                    name={key}
+            {/* Intraday line chart */}
+            <div className="line-chart-wrapper">
+              <ResponsiveContainer width="100%" height={450}>
+                <LineChart data={filteredChartData} margin={{ top: 20, right: 30, left: 10, bottom: 25 }}>
+                  <CartesianGrid stroke="#1e222b" vertical={true} horizontal={true} strokeDasharray="3 3" />
+                  <XAxis 
+                    dataKey="time" 
+                    stroke="#5d6575" 
+                    fontSize={11} 
+                    tickLine={false} 
+                    label={{ value: `Intraday Time — Loading analysis from: ${new Date(activeQueryDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}`, position: "insideBottom", offset: -16, fill: "var(--text-secondary)", fontSize: 11, fontWeight: 600 }}
                   />
-                );
-              })}
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+                  
+                  {/* Primary Y-axis: Open Interest */}
+                  <YAxis
+                    yAxisId="oi"
+                    tickFormatter={formatCompact}
+                    stroke="#94a3b8"
+                    fontSize={11}
+                    tickLine={false}
+                    width={50}
+                    orientation="right"
+                    domain={[(dataMin: number) => Math.max(0, dataMin - 50000), (dataMax: number) => dataMax + 50000]}
+                  />
+                  
+                  {/* Secondary Y-axis: Spot Price */}
+                  <YAxis
+                    yAxisId="spot"
+                    stroke="#64748b"
+                    fontSize={11}
+                    tickLine={false}
+                    width={65}
+                    orientation="left"
+                    domain={[(dataMin: number) => Math.floor(dataMin - 20), (dataMax: number) => Math.ceil(dataMax + 20)]}
+                    tickFormatter={(val) => Number(val).toLocaleString("en-IN")}
+                  />
+
+                  <Tooltip
+                    contentStyle={{ backgroundColor: "#12151e", borderColor: "#1e293b", color: "#e2e8f0" }}
+                    formatter={(value: any, name: any) => {
+                      if (name === "Spot") return [Number(value).toLocaleString("en-IN"), "Index Spot"];
+                      return [Number(value).toLocaleString("en-IN"), name];
+                    }}
+                  />
+                  <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: "11px" }} />
+
+                  {/* Dotted line for underlying index spot price */}
+                  <Line
+                    yAxisId="spot"
+                    type="monotone"
+                    dataKey="Spot"
+                    stroke="#64748b"
+                    strokeDasharray="4 4"
+                    strokeWidth={1.5}
+                    dot={false}
+                    name="Spot"
+                  />
+
+                  {/* Colored lines for individual selected contracts */}
+                  {selectedContracts.map((contract, idx) => {
+                    const color = LINE_COLORS[idx % LINE_COLORS.length];
+                    const key = `${contract.strike} ${contract.type} OI`;
+                    return (
+                      <Line
+                        key={key}
+                        yAxisId="oi"
+                        type="monotone"
+                        dataKey={key}
+                        stroke={color}
+                        strokeWidth={2}
+                        dot={false}
+                        activeDot={{ r: 4 }}
+                        name={key}
+                      />
+                    );
+                  })}
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Replay Scrubber Control Box */}
+            <div className="replay-control-panel">
+              <div className="replay-slider-row">
+                <button 
+                  onClick={() => {
+                    const maxLimit = (dateMode === "live" && !isWeekend && !isTodayHoliday) ? liveTimeMinutes : 930;
+                    setCurrentPlayMinutes(maxLimit);
+                    setTimeWindow("all");
+                    setIsPlaying(false);
+                  }} 
+                  className="btn-replay-reset"
+                  type="button"
+                >
+                  Reset
+                </button>
+                <div className="slider-container">
+                  <span className="slider-time">9:15 AM</span>
+                  <input
+                    type="range"
+                    min={555}
+                    max={(dateMode === "live" && !isWeekend && !isTodayHoliday) ? liveTimeMinutes : 930}
+                    value={currentPlayMinutes}
+                    onChange={(e) => {
+                      setIsPlaying(false);
+                      setCurrentPlayMinutes(Number(e.target.value));
+                    }}
+                    className="replay-range-slider"
+                  />
+                  <span className="slider-time">
+                    {minutesToTimeStr((dateMode === "live" && !isWeekend && !isTodayHoliday) ? liveTimeMinutes : 930)}
+                  </span>
+                </div>
+                <div className="playback-controls">
+                  <button onClick={handlePlayToggle} className="btn-play-pause" type="button">
+                    {isPlaying ? "❚❚ Pause" : "▶ Play"}
+                  </button>
+                  <span className="current-playback-time">
+                    Time: {minutesToTimeStr(currentPlayMinutes)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="replay-preset-buttons-row">
+                {[3, 5, 10, 15, 30, 60, 120, 180].map((mins) => {
+                  const label = mins >= 60 ? `Last ${mins / 60} hr` : `Last ${mins} min`;
+                  return (
+                    <button
+                      key={mins}
+                      onClick={() => setTimeWindow(String(mins))}
+                      className={`btn-preset ${timeWindow === String(mins) ? "active" : ""}`}
+                      type="button"
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+                <button
+                  onClick={() => setTimeWindow("all")}
+                  className={`btn-preset ${timeWindow === "all" ? "active" : ""}`}
+                  type="button"
+                >
+                  All
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </section>
     </div>
   );
