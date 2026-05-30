@@ -45,7 +45,7 @@ export function ExpirySelector({ symbol, selectedExpiry, onChange }: ExpirySelec
     return () => {
       active = false;
     };
-  }, [symbol, selectedExpiry, onChange]);
+  }, [symbol]);
 
   if (loading) {
     return (
