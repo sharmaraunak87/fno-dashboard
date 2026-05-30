@@ -34,13 +34,14 @@ const generateStraddleData = (options: OptionRow[], spot: number, strikes: numbe
     return seed / 2147483648;
   };
 
-  const times = [];
+  const times: string[] = [];
   for (let h = 9; h <= 15; h++) {
     const maxMin = h === 15 ? 30 : 55;
     for (let m = (h === 9 ? 15 : 0); m <= maxMin; m += 5) {
       times.push(`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`);
     }
   }
+
 
   const optMap = new Map(options.map((o) => [o.strike, o]));
 

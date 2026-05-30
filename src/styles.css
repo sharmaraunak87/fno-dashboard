@@ -1051,3 +1051,39 @@ input, select { font-family: inherit; }
 /* Cursor */
 .recharts-rectangle.recharts-tooltip-cursor { fill: rgba(255,255,255,0.03) !important; }
 .recharts-crosshair line { stroke: rgba(255,255,255,0.1) !important; }
+
+
+/* Date navigation buttons (added for historical date navigation sidebar control) */
+.date-nav-container {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  width: 100%;
+}
+
+.date-nav-btn {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 35px;
+  min-width: 32px;
+}
+
+.date-nav-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--text-secondary);
+}
+
+.date-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}

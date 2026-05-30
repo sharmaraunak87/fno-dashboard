@@ -61,6 +61,70 @@ function getPrecedingTradingDayStr(date: Date): string {
   return getLastTradingDayStr(d);
 }
 
+function getNextTradingDayStr(date: Date): string {
+  const checkDate = new Date(date);
+  while (true) {
+    checkDate.setDate(checkDate.getDate() + 1);
+    const dayOfWeek = checkDate.getDay();
+    const y = checkDate.getFullYear();
+    const m = String(checkDate.getMonth() + 1).padStart(2, "0");
+    const d = String(checkDate.getDate()).padStart(2, "0");
+    const dateStr = `${y}-${m}-${d}`;
+    
+    // Is it weekend?
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+      continue;
+    }
+    
+    // Is it holiday?
+    if (HOLIDAYS.includes(dateStr)) {
+      continue;
+    }
+    
+    return dateStr;
+  }
+}
+
+function getExpiriesForDate(symbol: string, baseDateStr: string, liveExpiries: string[]): string[] {
+  let targetWeekday = 4; // default to Thursday
+  if (liveExpiries && liveExpiries.length > 0) {
+    targetWeekday = new Date(liveExpiries[0]).getDay();
+  } else {
+    if (symbol === "FINNIFTY") targetWeekday = 2; // Tuesday
+    else if (symbol === "BANKNIFTY") targetWeekday = 3; // Wednesday
+  }
+
+  const expiries: string[] = [];
+  const baseDate = new Date(baseDateStr);
+  baseDate.setHours(12, 0, 0, 0);
+
+  let checkDate = new Date(baseDate);
+
+  for (let i = 0; i < 4; i++) {
+    if (i > 0 || checkDate.getDay() !== targetWeekday) {
+      do {
+        checkDate.setDate(checkDate.getDate() + 1);
+      } while (checkDate.getDay() !== targetWeekday);
+    }
+
+    const y = checkDate.getFullYear();
+    const m = String(checkDate.getMonth() + 1).padStart(2, "0");
+    const d = String(checkDate.getDate()).padStart(2, "0");
+    const expStr = `${y}-${m}-${d}`;
+
+    let finalExpStr = expStr;
+    if (HOLIDAYS.includes(expStr)) {
+      const tempDate = new Date(checkDate);
+      finalExpStr = getPrecedingTradingDayStr(tempDate);
+    }
+
+    expiries.push(finalExpStr);
+    checkDate.setDate(checkDate.getDate() + 1);
+  }
+
+  return expiries;
+}
+
 // Colors for the line series
 const LINE_COLORS = ["#ef4444", "#10b981", "#6366f1", "#f59e0b", "#ec4899", "#06b6d4", "#a855f7", "#14b8a6"];
 
@@ -73,20 +137,9 @@ export function MultiStrikeOiTab({
   isLive,
   marketHours
 }: MultiStrikeOiTabProps) {
-  // Expiries fetching
-  const [expiries, setExpiries] = useState<string[]>([]);
-  useEffect(() => {
-    fetch(`/api/expiries/${symbol}`)
-      .then((res) => {
-        if (!res.ok) throw new Error();
-        return res.json();
-      })
-      .then((data: { data: string[] }) => setExpiries(data.data))
-      .catch(() => {});
-  }, [symbol]);
-
   const [dateMode, setDateMode] = useState<"live" | "historical">("live");
   const [historicalDate, setHistoricalDate] = useState("2026-05-30");
+
 
   const todayDateStr = useMemo(() => {
     const d = new Date();
@@ -132,6 +185,65 @@ export function MultiStrikeOiTab({
     const kolkataDate = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
     return getPrecedingTradingDayStr(kolkataDate);
   }, []);
+
+  // Expiries fetching
+  const [liveExpiries, setLiveExpiries] = useState<string[]>([]);
+  useEffect(() => {
+    fetch(`/api/expiries/${symbol}`)
+      .then((res) => {
+        if (!res.ok) throw new Error();
+        return res.json();
+      })
+      .then((data: { data: string[] }) => setLiveExpiries(data.data || []))
+      .catch(() => {});
+  }, [symbol]);
+
+  // Compute expiries based on dateMode and selected date
+  const expiries = useMemo(() => {
+    if (dateMode === "live") {
+      return liveExpiries;
+    } else {
+      return getExpiriesForDate(symbol, historicalDate, liveExpiries);
+    }
+  }, [dateMode, historicalDate, liveExpiries, symbol]);
+
+  // Auto-select nearest expiry when historicalDate, symbol, or dateMode changes
+  useEffect(() => {
+    if (dateMode === "historical" && historicalDate) {
+      const generatedExpiries = getExpiriesForDate(symbol, historicalDate, liveExpiries);
+      if (generatedExpiries.length > 0) {
+        setExpiry(generatedExpiries[0]);
+      }
+    }
+  }, [historicalDate, symbol, dateMode, liveExpiries, setExpiry]);
+
+  // Auto-select first expiry in live mode if none is selected
+  useEffect(() => {
+    if (dateMode === "live" && liveExpiries.length > 0) {
+      if (!selectedExpiry || !liveExpiries.includes(selectedExpiry)) {
+        setExpiry(liveExpiries[0]);
+      }
+    }
+  }, [dateMode, liveExpiries, selectedExpiry, setExpiry]);
+
+  const handlePrevDate = () => {
+    const current = new Date(historicalDate);
+    const prevDateStr = getPrecedingTradingDayStr(current);
+    setHistoricalDate(prevDateStr);
+  };
+
+  const handleNextDate = () => {
+    const current = new Date(historicalDate);
+    const nextDateStr = getNextTradingDayStr(current);
+    if (nextDateStr <= precedingTradingDayStr) {
+      setHistoricalDate(nextDateStr);
+    }
+  };
+
+  const isNextDisabled = useMemo(() => {
+    return historicalDate >= precedingTradingDayStr;
+  }, [historicalDate, precedingTradingDayStr]);
+
 
   // Selection mode: "custom" | "high_oi" | "high_volume"
   const [selectionMode, setSelectionMode] = useState<"custom" | "high_oi" | "high_volume" >("high_oi");
@@ -509,9 +621,13 @@ export function MultiStrikeOiTab({
           ? Math.round(fallbackOption.callOi * Math.max(0.1, buildFactor))
           : Math.round(fallbackOption.putOi * Math.max(0.1, buildFactor));
 
-        const finalOi = actualOi !== undefined ? actualOi : (activeQueryDate === todayDateStr ? simOi : null);
+        const finalOi = actualOi !== undefined 
+          ? actualOi 
+          : (activeQueryDate === todayDateStr || !hasOptionCandlesData ? simOi : null);
 
         dataPoint[`${contract.strike} ${contract.type} OI`] = finalOi;
+
+
       });
 
       dataPoints.push(dataPoint);
@@ -688,15 +804,35 @@ export function MultiStrikeOiTab({
         {/* Historical Date Input shown if dateMode is historical */}
         {dateMode === "historical" && (
           <div className="filter-group">
-            <label className="filter-label">Historical Date</label>
-            <input
-              type="date"
-              className="filter-input-date"
-              value={historicalDate}
-              onChange={(e) => setHistoricalDate(e.target.value)}
-            />
+            <label className="filter-label">Date</label>
+            <div className="date-nav-container">
+              <input
+                type="date"
+                className="filter-input-date"
+                value={historicalDate}
+                onChange={(e) => setHistoricalDate(e.target.value)}
+              />
+              <button
+                type="button"
+                className="date-nav-btn"
+                onClick={handlePrevDate}
+                title="Previous Trading Day"
+              >
+                &lt;
+              </button>
+              <button
+                type="button"
+                className="date-nav-btn"
+                onClick={handleNextDate}
+                disabled={isNextDisabled}
+                title="Next Trading Day"
+              >
+                &gt;
+              </button>
+            </div>
           </div>
         )}
+
 
         {/* High Volume selection card */}
         <div className={`auto-select-card ${selectionMode === "high_volume" ? "active" : ""}`}>
