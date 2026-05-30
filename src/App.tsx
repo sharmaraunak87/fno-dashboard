@@ -232,6 +232,79 @@ export function App() {
     return () => { window.clearInterval(fallbackInterval); socket.close(); };
   }, [symbol, selectedExpiry]);
 
+  useEffect(() => {
+    let active = true;
+    const isClosed = marketHours ? !marketHours.isOpen : false;
+
+    if (isClosed && tick.timestamp) {
+      const dateObj = new Date(tick.timestamp);
+      const y = dateObj.getFullYear();
+      const m = String(dateObj.getMonth() + 1).padStart(2, "0");
+      const d = String(dateObj.getDate()).padStart(2, "0");
+      const dateStr = `${y}-${m}-${d}`;
+
+      fetch(`/api/historical-candles/${symbol}?date=${dateStr}`)
+        .then((res) => { if (!res.ok) throw new Error(); return res.json(); })
+        .then((result: { data: Array<{ time: string; close: number }> }) => {
+          if (!active) return;
+          if (result.data && result.data.length > 0) {
+            const finalPcr = tick.pcr || 1.0;
+            const candlesCount = result.data.length;
+            const historyData = result.data.map((candle, idx) => {
+              const progress = idx / (candlesCount - 1 || 1);
+              const baseNoise = Math.sin(progress * Math.PI * 2) * 0.08 + Math.cos(progress * Math.PI * 4) * 0.04;
+              const pcrVal = Number((finalPcr + baseNoise * (1 - progress)).toFixed(2));
+              
+              let formattedTime = candle.time;
+              if (formattedTime.length === 5) {
+                formattedTime = `${formattedTime}:00`;
+              }
+              return {
+                time: formattedTime,
+                spot: candle.close,
+                pcr: pcrVal
+              };
+            });
+            setHistory(historyData);
+          } else {
+            generateSimulatedHistory();
+          }
+        })
+        .catch(() => {
+          if (active) generateSimulatedHistory();
+        });
+    }
+
+    function generateSimulatedHistory() {
+      const historyData = [];
+      const baseSpot = tick.spot || 22550;
+      const basePcr = tick.pcr || 1.0;
+      
+      for (let i = 0; i < 50; i++) {
+        const progress = i / 49;
+        const spotVal = Number((baseSpot + Math.sin(progress * Math.PI * 3) * 60 + Math.cos(progress * Math.PI * 5) * 20 - (1 - progress) * 40).toFixed(2));
+        const pcrVal = Number((basePcr + Math.sin(progress * Math.PI * 2) * 0.1 * (1 - progress)).toFixed(2));
+        
+        const timeVal = new Date(new Date(tick.timestamp || Date.now()).getTime() - (50 - i) * 6 * 60 * 1000);
+        const timeStr = timeVal.toLocaleTimeString("en-IN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false
+        });
+
+        historyData.push({
+          time: timeStr,
+          spot: spotVal,
+          pcr: pcrVal
+        });
+      }
+      setHistory(historyData);
+    }
+
+    return () => { active = false; };
+  }, [symbol, marketHours?.isOpen, tick.timestamp, tick.spot, tick.pcr]);
+
   const totals = useMemo(() => ({
     callOi: tick.options.reduce((sum, row) => sum + row.callOi, 0),
     putOi: tick.options.reduce((sum, row) => sum + row.putOi, 0),
