@@ -11,7 +11,7 @@ export function getMarketDataProvider(): MarketDataProvider {
 
   // We always wrap to handle caching and market closed logic
   return {
-    name: "dhan",
+    name: primaryProvider.name,
     isConfigured: true,
     async getSnapshot(symbol, expiry) {
       const status = getMarketStatus();

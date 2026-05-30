@@ -1,6 +1,11 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { fileURLToPath } from "node:url";
 import type { Tick } from "../marketData/types";
+
+// __dirname is not available in ESM; derive it from import.meta.url
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const cacheDir = path.join(__dirname, "../cache");
 const cacheFile = path.join(cacheDir, "snapshots.json");
