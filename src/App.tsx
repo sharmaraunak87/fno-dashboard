@@ -90,30 +90,10 @@ const NAV_GROUPS = [
     ]
   },
   {
-    label: "Options",
+    label: "Analytics",
     items: [
-      { id: "oi", label: "Strike OI Analysis", icon: Layers3 },
-      { id: "smart_oi", label: "Smart OI", icon: Zap },
-      { id: "open_interest", label: "Open Interest", icon: BarChart2 },
-      { id: "pe_ce_diff", label: "PE-CE Difference", icon: Minus },
-      { id: "multistrike_chart", label: "MultiStrike Chart", icon: LineChart },
-      { id: "multistraddle", label: "Multi-Straddle Chart", icon: GitBranch },
-      { id: "straddle", label: "Straddle Chart", icon: Repeat },
-      { id: "price_vs_oi", label: "Price vs OI", icon: TrendingUp },
-      { id: "max_pain", label: "Max Pain", icon: Target },
-      { id: "pcr", label: "Put-Call Ratio", icon: ArrowUpDown },
-      { id: "timeseries", label: "Timeseries", icon: Clock },
-      { id: "option_chain", label: "Option Chain Live", icon: Grid },
-    ]
-  },
-  {
-    label: "Volatility",
-    items: [
-      { id: "greeks", label: "Gamma Exposure", icon: Gauge },
-      { id: "iv_skew", label: "Volatility Skew", icon: Sigma },
-      { id: "iv_hv", label: "IV-HV", icon: BarChart },
-      { id: "iv_grid", label: "IV Grid", icon: Grid },
-      { id: "premium_decay", label: "Premium Decay", icon: TrendingDown },
+      { id: "oi_analysis", label: "OI Analysis", icon: Layers3 },
+      { id: "volatility_analysis", label: "Volatility Analysis", icon: Gauge },
     ]
   },
   {
@@ -155,14 +135,29 @@ const NO_EXPIRY_TABS = new Set([
   "future_heatmap", "future_intraday", "screeners"
 ]);
 
-// Tabs that use full-width layout (no options chain at bottom)
-const FULL_WIDTH_TABS = new Set([
-  "oi", "holidays", "fii_dii", "fii_dii_summary", "sector_rotation",
-  "index_contributors", "index_weightage", "advance_decline",
-  "market_movers", "intraday_booster", "future_sentiment",
-  "future_heatmap", "future_intraday", "timeseries", "simulator",
-  "strategy_chart", "screeners"
-]);
+// Sub-tabs for OI Analysis
+const OI_SUB_TABS = [
+  { id: "multistrike", label: "Multi-Strike OI", icon: Layers3 },
+  { id: "smart_oi", label: "Smart OI", icon: Zap },
+  { id: "open_interest", label: "Open Interest", icon: BarChart2 },
+  { id: "pe_ce_diff", label: "PE-CE Difference", icon: Minus },
+  { id: "multistraddle", label: "Multi-Straddle", icon: GitBranch },
+  { id: "straddle", label: "Straddle", icon: Repeat },
+  { id: "price_vs_oi", label: "Price vs OI", icon: TrendingUp },
+  { id: "max_pain", label: "Max Pain", icon: Target },
+  { id: "pcr", label: "Put-Call Ratio", icon: ArrowUpDown },
+  { id: "timeseries", label: "Timeseries", icon: Clock },
+  { id: "option_chain", label: "Option Chain", icon: Grid },
+];
+
+// Sub-tabs for Volatility Analysis
+const VOLATILITY_SUB_TABS = [
+  { id: "greeks", label: "Gamma Exposure (GEX)", icon: Gauge },
+  { id: "iv_skew", label: "Volatility Skew", icon: Sigma },
+  { id: "iv_hv", label: "IV-HV Chart", icon: BarChart },
+  { id: "iv_grid", label: "IV Grid", icon: Grid },
+  { id: "premium_decay", label: "Premium Decay", icon: TrendingDown },
+];
 
 export function App() {
   const [symbol, setSymbol] = useState("NIFTY");
@@ -171,6 +166,8 @@ export function App() {
   const [history, setHistory] = useState<Array<{ time: string; spot: number; pcr: number }>>([]);
   const [isLive, setIsLive] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+  const [oiSubTab, setOiSubTab] = useState("multistrike");
+  const [volatilitySubTab, setVolatilitySubTab] = useState("greeks");
   const [marketHours, setMarketHours] = useState<MarketStatus | null>(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
@@ -248,7 +245,6 @@ export function App() {
 
   const isMarketClosed = marketHours ? !marketHours.isOpen : false;
   const showExpiry = !NO_EXPIRY_TABS.has(activeTab);
-  const showOptionsChain = !FULL_WIDTH_TABS.has(activeTab) && activeTab !== "holidays";
 
   return (
     <main className={`app-shell ${isSidebarCollapsed ? "sidebar-collapsed" : ""}`}>
@@ -304,6 +300,43 @@ export function App() {
           </div>
         )}
 
+        {/* Sub-Navigation for consolidated tabs */}
+        {activeTab === "oi_analysis" && (
+          <nav className="sub-nav-bar" aria-label="OI Analysis views">
+            {OI_SUB_TABS.map((sub) => {
+              const SubIcon = sub.icon;
+              return (
+                <button
+                  key={sub.id}
+                  className={`sub-nav-btn ${oiSubTab === sub.id ? "active" : ""}`}
+                  onClick={() => setOiSubTab(sub.id)}
+                >
+                  <SubIcon size={14} className="sub-nav-icon" />
+                  <span>{sub.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+        )}
+
+        {activeTab === "volatility_analysis" && (
+          <nav className="sub-nav-bar" aria-label="Volatility Analysis views">
+            {VOLATILITY_SUB_TABS.map((sub) => {
+              const SubIcon = sub.icon;
+              return (
+                <button
+                  key={sub.id}
+                  className={`sub-nav-btn ${volatilitySubTab === sub.id ? "active" : ""}`}
+                  onClick={() => setVolatilitySubTab(sub.id)}
+                >
+                  <SubIcon size={14} className="sub-nav-icon" />
+                  <span>{sub.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+        )}
+
         {showExpiry && (
           <>
             <section className="expiry-bar">
@@ -331,90 +364,84 @@ export function App() {
             </>
           )}
 
-          {activeTab === "oi" && (
+          {/* OI Analysis Sub-Tabs */}
+          {activeTab === "oi_analysis" && oiSubTab === "multistrike" && (
             <MultiStrikeOiTab symbol={symbol} setSymbol={setSymbol} selectedExpiry={selectedExpiry}
               setExpiry={setSelectedExpiry} liveTick={tick} isLive={isLive} marketHours={marketHours} />
           )}
 
-          {activeTab === "smart_oi" && (
+          {activeTab === "oi_analysis" && oiSubTab === "smart_oi" && (
             <article className="panel wide-panel">
               <PanelTitle title="Smart OI" subtitle="OI change analysis — identify buildup vs unwinding" />
               <SmartOI options={tick.options} spot={tick.spot} />
             </article>
           )}
 
-          {activeTab === "open_interest" && (
+          {activeTab === "oi_analysis" && oiSubTab === "open_interest" && (
             <article className="panel wide-panel">
               <PanelTitle title="Open Interest" subtitle="Call vs Put OI distribution across strikes" />
               <OpenInterestChart options={tick.options} spot={tick.spot} />
             </article>
           )}
 
-          {activeTab === "pe_ce_diff" && (
+          {activeTab === "oi_analysis" && oiSubTab === "pe_ce_diff" && (
             <article className="panel wide-panel">
               <PanelTitle title="PE-CE Difference" subtitle="Net Put minus Call OI per strike — bullish/bearish bias" />
               <PeCeDifference options={tick.options} spot={tick.spot} />
             </article>
           )}
 
-          {activeTab === "multistrike_chart" && (
-            <article className="panel wide-panel">
-              <PanelTitle title="MultiStrike Chart" subtitle="Multi-strike OI comparison chart" />
-              <MultiStrikeOiTab symbol={symbol} setSymbol={setSymbol} selectedExpiry={selectedExpiry}
-                setExpiry={setSelectedExpiry} liveTick={tick} isLive={isLive} marketHours={marketHours} />
-            </article>
-          )}
-
-          {activeTab === "multistraddle" && (
+          {activeTab === "oi_analysis" && oiSubTab === "multistraddle" && (
             <article className="panel wide-panel">
               <PanelTitle title="Multi-Straddle Chart" subtitle="Straddle premium intraday for top 5 near-ATM strikes" />
               <MultiStraddleChart options={tick.options} spot={tick.spot} symbol={symbol} />
             </article>
           )}
 
-          {activeTab === "straddle" && (
+          {activeTab === "oi_analysis" && oiSubTab === "straddle" && (
             <article className="panel wide-panel">
               <PanelTitle title="Straddle Chart" subtitle="ATM straddle premium intraday decay" />
               <StraddleChart options={tick.options} spot={tick.spot} symbol={symbol} />
             </article>
           )}
 
-          {activeTab === "price_vs_oi" && (
+          {activeTab === "oi_analysis" && oiSubTab === "price_vs_oi" && (
             <article className="panel wide-panel">
               <PanelTitle title="Price vs OI" subtitle="Intraday price and OI overlay — identify long/short build-up" />
               <PriceVsOI symbol={symbol} spot={tick.spot} />
             </article>
           )}
 
-          {activeTab === "max_pain" && (
+          {activeTab === "oi_analysis" && oiSubTab === "max_pain" && (
             <article className="panel wide-panel">
               <PanelTitle title="Max Pain" subtitle="Strike where option writers lose the least — expiry magnet" />
               <MaxPainChart options={tick.options} spot={tick.spot} />
             </article>
           )}
 
-          {activeTab === "pcr" && (
+          {activeTab === "oi_analysis" && oiSubTab === "pcr" && (
             <article className="panel wide-panel">
               <PanelTitle title="Put-Call Ratio" subtitle="PCR intraday trend — sentiment indicator" />
               <PutCallRatioChart symbol={symbol} currentPcr={tick.pcr} />
             </article>
           )}
 
-          {activeTab === "timeseries" && (
+          {activeTab === "oi_analysis" && oiSubTab === "timeseries" && (
             <article className="panel wide-panel">
               <PanelTitle title="Timeseries" subtitle="OI timeseries across near-ATM strikes" />
               <Timeseries options={tick.options} spot={tick.spot} symbol={symbol} />
             </article>
           )}
 
-          {activeTab === "option_chain" && (
+          {activeTab === "oi_analysis" && oiSubTab === "option_chain" && (
             <article className="panel wide-panel">
               <PanelTitle title="Option Chain Live" subtitle="Real-time side-by-side calls/puts with ATM highlighting" />
               <OptionsChainTable rows={tick.options} spot={tick.spot} />
             </article>
           )}
 
-          {activeTab === "greeks" && (
+          {/* Volatility Analysis Sub-Tabs */}
+          {activeTab === "volatility_analysis" && volatilitySubTab === "greeks" && (
             <>
               <article className="panel">
                 <PanelTitle title="Gamma Exposure (GEX)" subtitle="Net Gamma concentration across strikes" />
@@ -427,28 +454,28 @@ export function App() {
             </>
           )}
 
-          {activeTab === "iv_skew" && (
+          {activeTab === "volatility_analysis" && volatilitySubTab === "iv_skew" && (
             <article className="panel wide-panel">
               <PanelTitle title="Volatility Skew" subtitle="Put vs Call IV skew across strikes" />
               <VolatilitySkew options={tick.options} spot={tick.spot} />
             </article>
           )}
 
-          {activeTab === "iv_hv" && (
+          {activeTab === "volatility_analysis" && volatilitySubTab === "iv_hv" && (
             <article className="panel wide-panel">
               <PanelTitle title="IV-HV Chart" subtitle="Implied vs Historical Volatility — 30 day comparison" />
               <IvHvChart symbol={symbol} currentIv={averageIv} />
             </article>
           )}
 
-          {activeTab === "iv_grid" && (
+          {activeTab === "volatility_analysis" && volatilitySubTab === "iv_grid" && (
             <article className="panel wide-panel">
               <PanelTitle title="IV Grid" subtitle="Implied Volatility across strikes and expiries" />
               <IvGrid options={tick.options} spot={tick.spot} symbol={symbol} />
             </article>
           )}
 
-          {activeTab === "premium_decay" && (
+          {activeTab === "volatility_analysis" && volatilitySubTab === "premium_decay" && (
             <article className="panel wide-panel">
               <PanelTitle title="Premium Decay" subtitle="Theta decay curve — ATM option premium erosion" />
               <PremiumDecay options={tick.options} spot={tick.spot} />
@@ -566,14 +593,6 @@ export function App() {
                   <p>Average implied volatility across nearest strikes</p>
                 </div>
               </div>
-            </article>
-          )}
-
-          {/* Options chain shown at bottom for relevant tabs */}
-          {showOptionsChain && (
-            <article className="panel table-panel wide-panel">
-              <PanelTitle title="Real-Time Options Chain" subtitle="Side-by-side calls/puts with at-the-money highlighting" />
-              <OptionsChainTable rows={tick.options} spot={tick.spot} />
             </article>
           )}
         </section>
