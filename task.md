@@ -10,3 +10,8 @@
   - Run typecheck and bundle check.
 - `[x]` Live Testing
   - Run dev server and manually verify automatic top 6 selection and live updates.
+- `[x]` Historical Date Navigation Buttons
+  - Implement `<` and `>` buttons next to the date picker in the sidebar to step day-by-day skipping weekends and holidays.
+- `[x]` Automatic Historical Expiry Selection
+  - Auto-select the nearest upcoming expiry contract when a new historical date is selected and load options data for it immediately.
+

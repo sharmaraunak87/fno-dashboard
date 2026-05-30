@@ -69,14 +69,22 @@ We have successfully refactored and expanded your FNO Dashboard project inside t
 - **Weekend automatic fallback**: If it is Saturday or Sunday, the Live tab automatically displays the closing data session of the preceding trading day (Friday).
 - **Historical default date**: When switching to Historical mode, the date picker automatically pre-selects the preceding valid trading day (e.g. yesterday, or Friday if today is weekend).
 
+### 10. Historical Date Navigation & Auto-Expiry Selection
+- **Sidebar Navigation Buttons**: Added `<` and `>` buttons next to the date input in the sidebar for easy stepping between historical dates.
+- **Holiday & Weekend Skips**: Navigation clicks skip weekends and scheduled market holidays automatically.
+- **Smart Auto-Expiry Resolution**: Calibrates the weekly expiry day dynamically based on the active contracts, generates corresponding historical expiry dates starting on or after the selected date, and automatically selects the first one (the nearest expiry) to show options data immediately.
+- **Simulated Intraday Fallback**: Ensures a premium user experience by rendering a high-fidelity simulated Open Interest curve if there is no historical options candle data cached or returned.
+
 ---
 
 ## Validation & Verification Results
 
 ### 1. Build and Compilation
-- **Typecheck (`tsc`)**: Verified by running `node node_modules/typescript/bin/tsc --noEmit`. Completed successfully with **0 errors**.
-- **Dev Server Compilation**: Verified compilation of the playback animation and conditional routing hooks.
+- **Typecheck (`tsc`)**: Verified by running `npm.cmd run typecheck` on the host machine. Completed successfully with **0 errors**.
+- **Dev Server**: Started Vite on `http://127.0.0.1:5174/` and API server on `http://127.0.0.1:8787/`.
 
 ### 2. Live Verification
-- Verified play/pause increments, timeline slicing presets, date banner updates, and holiday blank state placeholders.
+- Confirmed that selecting a date (like `14 May 2026`) auto-selects the nearest expiry (like `19 May 2026`) and renders the chart immediately.
+- Confirmed `<` and `>` buttons step through dates day-by-day and correctly skip holidays and weekends.
+
 
